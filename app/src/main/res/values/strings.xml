@@ -13,4 +13,5 @@
 
     <string name="on">Navi is On</string>
     <string name="off">Navi is Off</string>
+    <string name="title_activity_history">HistoryActivity</string>
 </resources>
