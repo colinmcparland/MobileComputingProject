@@ -56,5 +56,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (navi_list[position].equalsIgnoreCase("Detail")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new View_Detial()).commit();
         }
+        if(navi_list[position].equalsIgnoreCase("Shopping View")){
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ShoppingViewFragment()).commit();
+        }
     }
 }
