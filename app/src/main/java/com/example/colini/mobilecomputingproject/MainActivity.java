@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         * You can load your view with the code here,
         * add xml and java class
         * go to string.xml file to check out the string-array entry.
-        * 
+        *
         * */
         if (navi_list[position].equalsIgnoreCase("Detail")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new View_Detial()).commit();
