@@ -94,8 +94,16 @@ public class ShoppingViewFragment extends android.support.v4.app.Fragment implem
     @Override
     public void onDestroy(){
         super.onDestroy();
-        camera.release();
     }
 
+    public void onPause(){
+        super.onPause();
+        camera.stopPreview();
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshCamera();
+    }
 }
