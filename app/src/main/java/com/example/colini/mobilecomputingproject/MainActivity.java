@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).commit();
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         listView = (ListView) findViewById(R.id.drawerList);
@@ -59,5 +60,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ShoppingViewFragment()).commit();
         }
+        drawerLayout.closeDrawer(findViewById(R.id.drawerList));
     }
 }

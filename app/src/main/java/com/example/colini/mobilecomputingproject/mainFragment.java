@@ -7,24 +7,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 /**
- * Created by Yang on 16-03-06.
+ * Created by Yang on 16-03-07.
  */
-public class View_Detial extends Fragment {
+public class mainFragment extends Fragment {
 
     private Button button;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.view_detail,container,false);
-        button = (Button) rootView.findViewById(R.id.DetailButton);
+
+        View rootView = inflater.inflate(R.layout.content_main,container,false);
+
+        button = (Button) rootView.findViewById(R.id.buttoninMain);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).commit();
+                System.out.println("Pressed!!!!!!!");
             }
         });
 
