@@ -54,12 +54,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         * go to string.xml file to check out the string-array entry.
         *
         * */
-        if (navi_list[position].equalsIgnoreCase("Detail")){
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new View_Detial()).commit();
+        if (navi_list[position].equalsIgnoreCase("Detail View")){
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).commit();
         }
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ShoppingViewFragment()).commit();
         }
+        if (navi_list[position].equalsIgnoreCase("History View")){
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).commit();
+        }
+        if (navi_list[position].equalsIgnoreCase("List View")){
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
+        }
+
         drawerLayout.closeDrawer(findViewById(R.id.drawerList));
     }
 }

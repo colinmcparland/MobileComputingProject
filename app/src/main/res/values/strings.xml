@@ -5,10 +5,10 @@
     <string name="shoppingview_name">Shopping View</string>
 
     <string-array name="navi_list">
-        <item>Detail</item>
+        <item>Detail View</item>
         <item>Shopping View</item>
-        <item>view name</item>
-        <item>HAHAHAHA</item>
+        <item>History View</item>
+        <item>List View</item>
     </string-array>
 
     <string name="on">Navi is On</string>
