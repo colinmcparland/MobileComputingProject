@@ -4,10 +4,12 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     //finished the view with fragment and set up a navi
@@ -15,6 +17,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private ListView listView;
     private String[] navi_list;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private int shortToast_time = 500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,23 +28,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         listView = (ListView) findViewById(R.id.drawerList);
         navi_list = getResources().getStringArray(R.array.navi_list);
+
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.on,R.string.on){
             @Override
             public void onDrawerOpened(View drawerView) {
+                Toast.makeText(getApplicationContext(),"Navi is On",Toast.LENGTH_SHORT).show();
                 super.onDrawerOpened(drawerView);
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
+                Toast.makeText(getApplicationContext(),"Navi is Off",Toast.LENGTH_SHORT).show();
                 super.onDrawerClosed(drawerView);
             }
         };
-
-        listView.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,navi_list));
-
+        listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, navi_list));
         listView.setOnItemClickListener(this);
-        //getSupportActionBar().setHomeButtonEnabled(true);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
     }
 
@@ -68,5 +74,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         drawerLayout.closeDrawer(findViewById(R.id.drawerList));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)){
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

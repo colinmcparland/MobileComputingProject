@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:id="@+id/drawerLayout">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mainContainer">
-    </FrameLayout>
+    </RelativeLayout>
 
     <ListView
         android:layout_width="240dp"
