@@ -52,7 +52,6 @@ public class ShoppingViewFragment extends android.support.v4.app.Fragment implem
 
         /*
         * Saving the pic into the Disk
-        * Still cannot find the pic
         * */
         button = (Button) myView.findViewById(R.id.scanButton);
         button.setOnClickListener(new View.OnClickListener() {
