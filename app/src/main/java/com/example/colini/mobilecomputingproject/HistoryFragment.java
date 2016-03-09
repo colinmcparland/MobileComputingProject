@@ -12,13 +12,6 @@ import android.database.sqlite.*;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,18 +21,19 @@ import android.widget.TextView;
 public class HistoryFragment extends Fragment {
 
     SQLiteDatabase mydatabase;
+    View rootView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.shoppingview_layout,container,false);
+        rootView = inflater.inflate(R.layout.content_history,container,false);
 
-//        mydatabase = SQLiteDatabase.openOrCreateDatabase("scanAndShop", null,null);
-        getActivity().openOrCreateDatabase("scanAdnShop",Context.MODE_PRIVATE,null);
+        getActivity().openOrCreateDatabase("scanAdnShop", Context.MODE_PRIVATE, null);
 
         LinearLayout LL = (LinearLayout) rootView.findViewById(R.id.mainContainer);
 
         initDB();
+
         Cursor dbElements = mydatabase.rawQuery("select * from history", null);
         if (dbElements.getCount()==0)
         {

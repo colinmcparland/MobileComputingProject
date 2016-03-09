@@ -11,6 +11,7 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.colini.mobilecomputingproject.HistoryActivity"
     tools:showIn="@layout/activity_history">
+
     <ScrollView android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/scroller"
@@ -23,4 +24,5 @@
             android:layout_height="wrap_content"
             android:id="@+id/mainContainer"></LinearLayout>
     </ScrollView>
+
 </RelativeLayout>
