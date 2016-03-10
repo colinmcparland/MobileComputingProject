@@ -53,6 +53,7 @@ public class HistoryFragment extends Fragment {
 
         LinearLayout hdr2=createHeader("2", "SuperStore Halifax", "2016-02-02 03:21", "$28.2");
         LL.addView(hdr2);
+
         for (int i=0; i<7; i++) {
             LinearLayout row = creatRow("Toilet Paper", "$10");
             LL.addView(row);

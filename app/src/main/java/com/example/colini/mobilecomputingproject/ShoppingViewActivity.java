@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,14 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 public class ShoppingViewActivity extends AppCompatActivity implements SurfaceHolder.Callback{
     SurfaceView surfaceView;
@@ -126,5 +135,41 @@ public class ShoppingViewActivity extends AppCompatActivity implements SurfaceHo
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     *
+     * @param barcode
+     * @return JSON Object
+     * @throws JSONException
+     */
+    public JSONObject queryUPC(String barcode) throws JSONException
+    {
+        JSONObject json;
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
+        String K="";
+        try {
+            URL url = new URL("http://api.upcdatabase.org/json/72b665bccfa4c65025f18e2be5bd2e65/"+barcode);
+            InputStream is = url.openStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+            String line;
+            while ( (line = br.readLine()) != null)
+
+                K+=line;
+
+            br.close();
+            is.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        json = new JSONObject(K);
+
+        return json;
     }
 }
