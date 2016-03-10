@@ -28,7 +28,7 @@ public class HistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.content_history,container,false);
 
-        getActivity().openOrCreateDatabase("scanAdnShop", Context.MODE_PRIVATE, null);
+        mydatabase = getActivity().openOrCreateDatabase("scanAdnShop", Context.MODE_PRIVATE, null);
 
         LinearLayout LL = (LinearLayout) rootView.findViewById(R.id.mainContainer);
 
