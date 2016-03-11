@@ -146,9 +146,10 @@ public class ShoppingViewActivity extends AppCompatActivity implements SurfaceHo
     public JSONObject queryUPC(String barcode) throws JSONException
     {
         JSONObject json;
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
         String K="";
         try {
             URL url = new URL("http://api.upcdatabase.org/json/72b665bccfa4c65025f18e2be5bd2e65/"+barcode);
