@@ -7,41 +7,33 @@
     android:layout_height="match_parent"
     tools:context="com.example.colini.mobilecomputingproject.ShoppingViewActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <SurfaceView
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/mySurface"
-            />
-        <Button
-            android:layout_width="100dp"
-            android:layout_height="50dp"
+            android:layout_height="200dp"
+            android:textAlignment="center"
+            android:id="@+id/myTextView"
             android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"/>
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="50dp"
             android:text="@string/scan"
-            android:id="@+id/scanButton"
-            />
+            android:id="@+id/myButton"
+            android:onClick="scanAgain"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="@string/home"
+            android:id="@+id/myButton2"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:onClick="home"/>
 
-        <com.example.colini.mobilecomputingproject.DrawFrame
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/myView"
-            />
     </RelativeLayout>
+
 </android.support.design.widget.CoordinatorLayout>

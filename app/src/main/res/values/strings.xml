@@ -10,7 +10,7 @@
         <item>History View</item>
         <item>List View</item>
     </string-array>
-
+    <string name="home">Home</string>
     <string name="on">Navi is On</string>
     <string name="off">Navi is Off</string>
     <string name="title_activity_history">HistoryActivity</string>

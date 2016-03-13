@@ -25,6 +25,10 @@
             android:name=".HistoryActivity"
             android:label="@string/title_activity_history"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".ShoppingViewActivity"
+            android:label="ShoppingViewActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
