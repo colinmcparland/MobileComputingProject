@@ -9,30 +9,17 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/red">
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="match_parent"
             android:textAlignment="center"
             android:id="@+id/myTextView"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"/>
-        <Button
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:text="@string/scan"
-            android:id="@+id/myButton"
-            android:onClick="scanAgain"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"/>
-        <Button
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:text="@string/home"
-            android:id="@+id/myButton2"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:onClick="home"/>
+
+
 
     </RelativeLayout>
 

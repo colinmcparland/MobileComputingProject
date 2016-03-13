@@ -23,10 +23,9 @@ public class ShoppingViewActivity extends Activity {
         super.onCreate(savedInstanceState);
         i = new IntentIntegrator(this);
         i.initiateScan();
-        setContentView(R.layout.shoppingview_layout);
+        setContentView(R.layout.cartview_layout);
 
         tv = (TextView) findViewById(R.id.myTextView);
-        btn = (Button) findViewById(R.id.myButton);
 
     }
 

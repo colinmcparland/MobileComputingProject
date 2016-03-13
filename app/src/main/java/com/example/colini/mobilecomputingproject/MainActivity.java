@@ -17,6 +17,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
+import java.util.ArrayList;
 import java.util.jar.Manifest;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -26,38 +30,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private String[] navi_list;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private int shortToast_time = 500;
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            android.Manifest.permission.READ_EXTERNAL_STORAGE,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
+    private Bundle bundle;
+    private int codesLength = 0;
 
-    String code;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        bundle = new Bundle();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).commit();
-
-        Intent i = getIntent();
-        code = i.getStringExtra("code");
-        if(code != null){
-            TextView tv = (TextView) findViewById(R.id.textView);
-            tv.setText(code);
-        }
-
-        int permission = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    this,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         listView = (ListView) findViewById(R.id.drawerList);
@@ -98,14 +81,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).commit();
         }
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
-            Intent i = new Intent(MainActivity.this, ShoppingViewActivity.class);
-            startActivity(i);
+            IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
+            i.initiateScan();
         }
         if (navi_list[position].equalsIgnoreCase("History View")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).commit();
         }
         if (navi_list[position].equalsIgnoreCase("List View")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
+        }
+        if(navi_list[position].equalsIgnoreCase("Cart View")){
+            bundle.putInt("codesLength", codesLength); //incase there are no scans...
+            CartViewFragment cvf = new CartViewFragment();
+            cvf.setArguments(bundle);
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, cvf).commit();
         }
 
         drawerLayout.closeDrawer(findViewById(R.id.drawerList));
@@ -117,6 +107,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanResult != null) {
+            String result = scanResult.getContents();
+            System.out.println(result);
+
+            String key = "code" + codesLength;
+            bundle.putString(key, result);
+            codesLength++;
+        }
+        // else continue with any other code you need in the method
+        //...
     }
 
 
