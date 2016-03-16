@@ -49,13 +49,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.on,R.string.on){
             @Override
             public void onDrawerOpened(View drawerView) {
-                Toast.makeText(getApplicationContext(),"Navi is On",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),"Navi is On",Toast.LENGTH_SHORT).show();
                 super.onDrawerOpened(drawerView);
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                Toast.makeText(getApplicationContext(),"Navi is Off",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),"Navi is Off",Toast.LENGTH_SHORT).show();
                 super.onDrawerClosed(drawerView);
             }
         };
@@ -121,6 +121,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         // else continue with any other code you need in the method
         //...
+    }
+
+    private Detail_Data detail_data;
+    public void setDetail(Detail_Data x){
+        detail_data = x;
+    }
+    public Detail_Data getDetail_data(){
+        return detail_data;
     }
 
 

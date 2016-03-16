@@ -1,10 +1,7 @@
 package com.example.colini.mobilecomputingproject;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 
@@ -22,27 +20,29 @@ public class View_Detial extends Fragment {
 
     private Button button;
     private ImageView imageView;
-    private File imageFile;
+    private TextView textView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.view_detail,container,false);
         button = (Button) rootView.findViewById(R.id.DetailButton);
+        textView = (TextView) rootView.findViewById(R.id.textView2);
+        button.setText("Delete");
 
+        MainActivity myaty = (MainActivity) getActivity();
+        Detail_Data x = myaty.getDetail_data();
+
+        textView.setText(String.format("Name: %s \nCategory: %s \nPrice: %s \nDescription: %s \nBarcode: %s",x.getName(),
+                x.getCategory(),x.getPrice(),x.getDescription(),x.getBarcode()));
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).commit();
+
+                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new mainFragment()).commit();
             }
         });
-
-        // Trying to show the pic just take in the shopping view
-//        imageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) +"test.jpg");
-//        imageView = (ImageView) rootView.findViewById(R.id.DetailimageView);
-//        Bitmap bmp = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-//        imageView.setImageBitmap(bmp);
 
         return rootView;
     }
