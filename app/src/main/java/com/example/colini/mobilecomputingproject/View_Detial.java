@@ -33,9 +33,10 @@ public class View_Detial extends Fragment {
         MainActivity myaty = (MainActivity) getActivity();
         Detail_Data x = myaty.getDetail_data();
 
-        textView.setText(String.format("Name: %s \nCategory: %s \nPrice: %s \nDescription: %s \nBarcode: %s",x.getName(),
-                x.getCategory(),x.getPrice(),x.getDescription(),x.getBarcode()));
-
+        if (x != null) {
+            textView.setText(String.format("Name: %s \nCategory: %s \nPrice: %s \nDescription: %s \nBarcode: %s", x.getName(),
+                    x.getCategory(), x.getPrice(), x.getDescription(), x.getBarcode()));
+        }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
