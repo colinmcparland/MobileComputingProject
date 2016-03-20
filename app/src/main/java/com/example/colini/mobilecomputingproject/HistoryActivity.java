@@ -1,3 +1,5 @@
+/*  Deprecated, replaced by HistoryFragment  */
+
 package com.example.colini.mobilecomputingproject;
 
 import android.database.Cursor;

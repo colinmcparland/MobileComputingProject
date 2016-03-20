@@ -45,4 +45,5 @@ dependencies {
     // This mostly affects encoding, but you should test if you plan to support these versions.
     // Older versions e.g. 2.2 may also work if you need support for older Android versions.
     compile 'com.google.zxing:core:3.0.1'
+    compile 'org.jsoup:jsoup:1.8.3'
 }
