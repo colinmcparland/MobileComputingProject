@@ -26,7 +26,7 @@ import android.widget.TextView;
 public class ListFragment extends Fragment {
 
     SQLiteDatabase mydatabase;
-
+    Button button;
 
     @Nullable
     @Override
@@ -37,6 +37,13 @@ public class ListFragment extends Fragment {
         LinearLayout LL = (LinearLayout) rootView.findViewById(R.id.list);
         //mydatabase.execSQL("DROP TABLE list;");
         initDB();
+        button = (Button) rootView.findViewById(R.id.search_list_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().beginTransaction().replace(R.id.mainContainer,new searchFragment()).commit();
+            }
+        });
 
 
 

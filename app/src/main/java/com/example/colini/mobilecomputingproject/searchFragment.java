@@ -1,7 +1,5 @@
 package com.example.colini.mobilecomputingproject;
 
-import android.app.Fragment;
-
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
@@ -22,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.support.v4.app.Fragment;
 
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
@@ -50,12 +49,12 @@ public class searchFragment extends Fragment {
         searchButton.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
-                        LinearLayout ResultLayout=(LinearLayout) rootView.findViewById(R.id.results);
+                        LinearLayout ResultLayout = (LinearLayout) rootView.findViewById(R.id.results);
                         ResultLayout.removeAllViews();
-                        ArrayList<String> result=retrieveSearchResult(searchfield.getText().toString());
-                        int i=0;
-                        for(String e: result)
-                            ResultLayout.addView(createRow(e,i++));
+                        ArrayList<String> result = retrieveSearchResult(searchfield.getText().toString());
+                        int i = 0;
+                        for (String e : result)
+                            ResultLayout.addView(createRow(e, i++));
                     }
                 });
 
