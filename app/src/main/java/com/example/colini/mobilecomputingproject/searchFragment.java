@@ -1,5 +1,7 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
@@ -37,7 +39,7 @@ public class searchFragment extends Fragment {
     ArrayList<String> List=new ArrayList<String>();
     ArrayList<String> currentList=new ArrayList<String>();
     ArrayList<Button> addButtons=new ArrayList<Button>();
-
+    SQLiteDatabase mydatabase;
 
     @Nullable
     @Override
@@ -45,6 +47,7 @@ public class searchFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.search_layout,container,false);
 
         createSearchBar(rootView);
+        mydatabase = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
 
         searchButton.setOnClickListener(
                 new Button.OnClickListener() {
@@ -153,7 +156,8 @@ public class searchFragment extends Fragment {
                 new Button.OnClickListener(){
                     public void onClick(View v)
                     {
-                        List.add(currentList.get(ii));
+                        mydatabase.execSQL("insert into list (product_name, scanned) values('"+productName+"',0)");
+                        //List.add(currentList.get(ii));
                         Snackbar.make(v, productName+" has been added!", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }

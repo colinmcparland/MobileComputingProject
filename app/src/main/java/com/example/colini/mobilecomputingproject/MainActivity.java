@@ -3,6 +3,7 @@ package com.example.colini.mobilecomputingproject;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Bundle bundle;
     private int codesLength = 0;
     private ArrayList <String> upcCodes;
-
+    SQLiteDatabase mydatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().setHomeButtonEnabled(true);
 
         upcCodes = new ArrayList<>();
+        mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE ,null);
     }
 
     @Override
@@ -132,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public Detail_Data getDetail_data(){
         return detail_data;
     }
+    public SQLiteDatabase getDatabase(){return mydatabase;}
 
 
 }

@@ -33,7 +33,7 @@ public class ListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.list_main,container,false);
 
-        mydatabase = getActivity().openOrCreateDatabase("scanAndShop1", Context.MODE_PRIVATE,null);
+        mydatabase = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
         LinearLayout LL = (LinearLayout) rootView.findViewById(R.id.list);
         //mydatabase.execSQL("DROP TABLE list;");
         initDB();
@@ -44,6 +44,7 @@ public class ListFragment extends Fragment {
                 getFragmentManager().beginTransaction().replace(R.id.mainContainer,new searchFragment()).commit();
             }
         });
+
 
 
 
