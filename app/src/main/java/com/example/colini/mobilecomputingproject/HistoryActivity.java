@@ -159,11 +159,10 @@ public class HistoryActivity extends AppCompatActivity {
 
     public void initDB()
     {
-        mydatabase.execSQL("CREATE TABLE if not exists`history` (" +
-                "`id` int(10) NOT NULL," +
-                "  `transactionId` int(20) NOT NULL," +
-                "  `pName` char(255) NOT NULL," +
-                "  `price` float(4,2) NOT NULL" +
+        mydatabase.execSQL("CREATE TABLE if not exists`list` (" +
+                "`id` int(20) NOT NULL," +
+                "  `product_name` text NOT NULL," +
+                "  `scanned` int(1) NOT NULL" +
                 ")");
     }
 
