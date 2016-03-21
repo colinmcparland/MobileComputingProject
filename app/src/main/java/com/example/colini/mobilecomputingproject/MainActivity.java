@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private int shortToast_time = 500;
     private Bundle bundle;
     private int codesLength = 0;
-
+    private ArrayList <String> upcCodes;
 
 
     @Override
@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        upcCodes = new ArrayList<>();
     }
 
     @Override
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
             IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
+            i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
             i.initiateScan();
         }
         if (navi_list[position].equalsIgnoreCase("History View")){
@@ -90,12 +92,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (navi_list[position].equalsIgnoreCase("List View")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
         }
-        if(navi_list[position].equalsIgnoreCase("Cart View")){
-            bundle.putInt("codesLength", codesLength); //incase there are no scans...
-            CartViewFragment cvf = new CartViewFragment();
-            cvf.setArguments(bundle);
-
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, cvf).commit();
+        if(navi_list[position].equalsIgnoreCase("Checkout View")){
+            if(upcCodes != null){
+            bundle.putStringArrayList("upcCodes", upcCodes);
+            CheckoutFragment cof = new CheckoutFragment();
+            cof.setArguments(bundle);
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, cof).commit();}
+            else{
+                System.out.println("No ArrayList");
+            }
         }
 
         drawerLayout.closeDrawer(findViewById(R.id.drawerList));
@@ -114,10 +119,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (scanResult != null) {
             String result = scanResult.getContents();
             System.out.println(result);
-
-            String key = "code" + codesLength;
-            bundle.putString(key, result);
-            codesLength++;
+            upcCodes.add(result);
         }
         // else continue with any other code you need in the method
         //...

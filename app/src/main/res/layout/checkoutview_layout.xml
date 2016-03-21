@@ -9,18 +9,25 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/red">
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="600dp"
+            android:layout_height="300dp"
+            android:layout_centerInParent="true"
+            android:id="@+id/barcode_image"
+            />
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
             android:textAlignment="center"
-            android:id="@+id/myTextView"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"/>
-
-
-
+            android:id="@+id/upc_code"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/barcode_image"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:id="@+id/item_description"
+            android:layout_below="@+id/upc_code"/>
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

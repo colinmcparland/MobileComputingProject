@@ -9,7 +9,7 @@
         <item>Shopping View</item>
         <item>History View</item>
         <item>List View</item>
-        <item>Cart View</item>
+        <item>Checkout View</item>
     </string-array>
     <string name="home">Home</string>
     <string name="on">Navi is On</string>

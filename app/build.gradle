@@ -23,7 +23,10 @@ repositories {
     mavenCentral()
 
     maven {
-        url "https://raw.github.com/embarkmobile/zxing-android-minimal/mvn-repo/maven-repository/"
+        url 'https://raw.github.com/embarkmobile/zxing-android-minimal/mvn-repo/maven-repository/'
+    }
+    maven{
+        url 'com.google.zxing'
     }
 }
 
@@ -41,9 +44,6 @@ dependencies {
     // Android version and what is available.
     compile 'com.embarkmobile:zxing-android-integration:2.0.0@aar'
 
-    // Version 3.0.x of zxing core contains some code that is not compatible on Android 2.2 and earlier.
-    // This mostly affects encoding, but you should test if you plan to support these versions.
-    // Older versions e.g. 2.2 may also work if you need support for older Android versions.
-    compile 'com.google.zxing:core:3.0.1'
     compile 'org.jsoup:jsoup:1.8.3'
+    compile 'com.google.zxing:core:3.2.1'
 }
