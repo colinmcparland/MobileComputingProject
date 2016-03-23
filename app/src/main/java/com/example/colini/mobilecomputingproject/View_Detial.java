@@ -41,7 +41,7 @@ public class View_Detial extends Fragment {
                     x.getCategory(), x.getPrice(), x.getDescription(), x.getBarcode()));
         }*/
 
-        int id = getArguments().getInt("ID");
+        final int id = getArguments().getInt("ID");
         mydatabase = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
         Cursor cursor = mydatabase.rawQuery("select * from list where id=" + id,null);
         cursor.moveToFirst();
@@ -54,8 +54,8 @@ public class View_Detial extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new mainFragment()).commit();
+                mydatabase.execSQL("delete from list where id = " + id);
+                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
             }
         });
 
