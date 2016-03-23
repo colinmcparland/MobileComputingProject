@@ -76,10 +76,11 @@ public class ListFragment extends Fragment {
         LinearLayout.LayoutParams prams =new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         ImageView img= new ImageView(getActivity());
         ImageView cancel=new ImageView(getActivity());
+        ImageView arrow = new ImageView(getActivity());
 
         cancel.setImageResource(R.drawable.cancel);
         img.setImageResource(i == 0 ? R.drawable.unchecked : R.drawable.checked);
-
+        arrow.setImageResource(R.drawable.arrow);
 
         cancel.setPadding(0, 0, 10, 0);
 
@@ -87,7 +88,7 @@ public class ListFragment extends Fragment {
 
         product.setText(productName);
         product.setTextSize(16);
-        product.setWidth(590);
+        product.setWidth(470);
         product.setPadding(20, 20, 20, 20);
 
 
@@ -116,9 +117,23 @@ public class ListFragment extends Fragment {
                 }
         );
 
+        arrow.setOnClickListener(
+                new Button.OnClickListener() {
+                    public void onClick(View v) {
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("ID", ii);
+                        View_Detial fragobj = new View_Detial();
+                        fragobj.setArguments(bundle);
+
+                        getFragmentManager().beginTransaction().replace(R.id.mainContainer, fragobj).commit();
+                    }
+                }
+        );
+
         Row.addView(product);
         Row.addView(img);
         Row.addView(cancel);
+        Row.addView(arrow);
         Row.setLayoutParams(prams);
         Row.setGravity(Gravity.CENTER_VERTICAL);
         return Row;

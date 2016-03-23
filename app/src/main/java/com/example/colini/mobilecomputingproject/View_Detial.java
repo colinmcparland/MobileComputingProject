@@ -1,6 +1,9 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,7 +20,7 @@ import java.io.File;
  * Created by Yang on 16-03-06.
  */
 public class View_Detial extends Fragment {
-
+    SQLiteDatabase mydatabase;
     private Button button;
     private ImageView imageView;
     private TextView textView;
@@ -33,10 +36,21 @@ public class View_Detial extends Fragment {
         MainActivity myaty = (MainActivity) getActivity();
         Detail_Data x = myaty.getDetail_data();
 
-        if (x != null) {
+        /*if (x != null) {
             textView.setText(String.format("Name: %s \nCategory: %s \nPrice: %s \nDescription: %s \nBarcode: %s", x.getName(),
                     x.getCategory(), x.getPrice(), x.getDescription(), x.getBarcode()));
-        }
+        }*/
+
+        int id = getArguments().getInt("ID");
+        mydatabase = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
+        Cursor cursor = mydatabase.rawQuery("select * from list where id=" + id,null);
+        cursor.moveToFirst();
+
+        if(cursor.getCount() != 0)
+            textView.setText("Name: " + cursor.getString(1));
+        else
+            textView.setText("No value exists in database");
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
