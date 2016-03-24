@@ -121,7 +121,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
         if (item.getItemId() == R.id.action_settings){
             //Do things here
+            //You can delete the print and toast message.
             System.out.println("Search button is pressed !!!!!!!");
+            Toast.makeText(getApplicationContext(),"Search button pressed",Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
