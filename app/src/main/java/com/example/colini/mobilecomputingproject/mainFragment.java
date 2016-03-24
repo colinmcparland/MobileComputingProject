@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+
 /**
  * Created by Yang on 16-03-07.
  */
@@ -35,6 +37,8 @@ public class mainFragment extends Fragment {
                 MainActivity myaty = (MainActivity) getActivity();
                 myaty.setDetail(x);
                 textView.setText("Done!");
+                IntentIntegrator i = new IntentIntegrator(getActivity()); //between this line and i.initiateScan() we can edit the Scanner
+                i.initiateScan();
             }
         });
 
