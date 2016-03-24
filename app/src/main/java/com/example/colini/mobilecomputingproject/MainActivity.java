@@ -1,8 +1,10 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -116,6 +119,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if (actionBarDrawerToggle.onOptionsItemSelected(item)){
             return true;
         }
+        if (item.getItemId() == R.id.action_settings){
+            //Do things here
+            System.out.println("Search button is pressed !!!!!!!");
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -144,8 +152,20 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+
+
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        actionBarDrawerToggle.syncState();
+    }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        actionBarDrawerToggle.onConfigurationChanged(newConfig);
+    }
 }
