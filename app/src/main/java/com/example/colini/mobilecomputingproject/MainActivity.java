@@ -47,7 +47,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bundle = new Bundle();
-        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).addToBackStack("mainFragment").commit();
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         listView = (ListView) findViewById(R.id.drawerList);
@@ -87,7 +87,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         *
         * */
         if (navi_list[position].equalsIgnoreCase("Detail View")){
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).addToBackStack("DetailFragment").commit();
         }
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
             IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
@@ -95,17 +95,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             i.initiateScan();
         }
         if (navi_list[position].equalsIgnoreCase("History View")){
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).addToBackStack("HistoryFragment").commit();
         }
         if (navi_list[position].equalsIgnoreCase("List View")){
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
         }
         if(navi_list[position].equalsIgnoreCase("Checkout View")){
             if(upcCodes != null){
             bundle.putStringArrayList("upcCodes", upcCodes);
             CheckoutFragment cof = new CheckoutFragment();
             cof.setArguments(bundle);
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, cof).commit();}
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, cof).addToBackStack("CheckoutFragment").commit();}
             else{
                 System.out.println("No ArrayList");
             }
