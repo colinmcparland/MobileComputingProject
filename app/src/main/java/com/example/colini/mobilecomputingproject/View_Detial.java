@@ -34,6 +34,7 @@ public class View_Detial extends Fragment {
         button.setText("Delete");
 
         MainActivity myaty = (MainActivity) getActivity();
+
         Detail_Data x = myaty.getDetail_data();
 
         /*if (x != null) {

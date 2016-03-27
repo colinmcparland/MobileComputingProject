@@ -1,5 +1,6 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,8 +11,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -41,10 +46,9 @@ public class ListFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.mainContainer,new searchFragment()).commit();
+                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new searchFragment()).commit();
             }
         });
-
 
 
 
@@ -77,8 +81,10 @@ public class ListFragment extends Fragment {
         ImageView img= new ImageView(getActivity());
         ImageView cancel=new ImageView(getActivity());
 
+
         cancel.setImageResource(R.drawable.cancel);
         img.setImageResource(i == 0 ? R.drawable.unchecked : R.drawable.checked);
+
 
         cancel.setPadding(0, 0, 10, 0);
 
@@ -86,7 +92,7 @@ public class ListFragment extends Fragment {
 
         product.setText(productName);
         product.setTextSize(16);
-        product.setWidth(560);
+        product.setWidth(570);
         product.setPadding(20, 20, 20, 20);
 
 

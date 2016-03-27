@@ -47,9 +47,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bundle = new Bundle();
-        /*here we should get the users location and check vs Google Places. If they're in a store we\
-         will start the scanner, if not we will start at the List.
-        */
         getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).addToBackStack("mainFragment").commit();
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
@@ -133,12 +130,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent); //from ZXIng, getting the result of the Scan
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
             String result = scanResult.getContents(); //this is the UPC code of the item scanned.
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
-            //we should prompt user to continue scanning or go to the list view after this..
         }
+        // else continue with any other code you need in the method
+        //...
     }
 
     private Detail_Data detail_data;
