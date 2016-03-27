@@ -62,10 +62,10 @@ public class ListFragment extends Fragment {
 
         if (cursor.getCount() != 0){
             cursor.moveToFirst();
-            LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(1), Integer.parseInt(cursor.getString(3))));
+            LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(2), Integer.parseInt(cursor.getString(3))));
             while(cursor.moveToNext())
             {
-                LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(1),Integer.parseInt(cursor.getString(3))));
+                LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(2),Integer.parseInt(cursor.getString(3))));
             }
         }
 
