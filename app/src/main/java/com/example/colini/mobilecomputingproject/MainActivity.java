@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.StrictMode;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -27,6 +30,13 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.jar.Manifest;
 
@@ -41,6 +51,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private int codesLength = 0;
     private ArrayList <String> upcCodes;
     SQLiteDatabase mydatabase;
+    public static String currentView="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +60,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         bundle = new Bundle();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).addToBackStack("mainFragment").commit();
 
+        mydatabase = openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
+        initDB();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         listView = (ListView) findViewById(R.id.drawerList);
         navi_list = getResources().getStringArray(R.array.navi_list);
@@ -69,12 +82,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, navi_list));
         listView.setOnItemClickListener(this);
 
+
+
+
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
         upcCodes = new ArrayList<>();
         mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE ,null);
+
+
     }
 
     @Override
@@ -122,21 +140,89 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if (item.getItemId() == R.id.action_settings){
             //Do things here
             //You can delete the print and toast message.
-            System.out.println("Search button is pressed !!!!!!!");
+
             Toast.makeText(getApplicationContext(),"Search button pressed",Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    public void initDB()
+    {
+        mydatabase.execSQL("create table if not exists list (" +
+                "id INTEGER PRIMARY KEY   AUTOINCREMENT ," +
+                "product_name char(255)," +
+                "scanned int" +
+                ")");
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent){
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
             String result = scanResult.getContents(); //this is the UPC code of the item scanned.
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
+
+            try {
+                JSONObject json = queryUPC(result);
+                Cursor c = mydatabase.rawQuery("select * from list where product_name='"+json.getString("itemname")+" and scanned = 0';",null);
+                if (c.getCount()==0)
+                {
+                    // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
+
+                    // IF (YES){
+                    mydatabase.execSQL("insert into list (product_name, scanned) values('"+json.getString("itemname")+"',1)");
+                    //}
+                }else
+                {
+                    mydatabase.execSQL("update list set scanned=1 where product_name='"+json.getString("itemname")+"';");
+                    // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
+
+                }
+
+            }catch(JSONException e)
+            {
+
+            }
         }
         // else continue with any other code you need in the method
         //...
+    }
+
+
+    /**
+     *
+     * @param barcode
+     * @return JSON Object
+     * @throws JSONException
+     */
+    public JSONObject queryUPC(String barcode) throws JSONException
+    {
+        JSONObject json;
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+        StrictMode.setThreadPolicy(policy);
+        String K="";
+        try {
+            URL url = new URL("http://api.upcdatabase.org/json/72b665bccfa4c65025f18e2be5bd2e65/"+barcode);
+            InputStream is = url.openStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+            String line;
+            while ( (line = br.readLine()) != null)
+
+                K+=line;
+
+            br.close();
+            is.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        json = new JSONObject(K);
+
+        return json;
     }
 
     private Detail_Data detail_data;
@@ -151,11 +237,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-
-
-        return super.onCreateOptionsMenu(menu);
+        if (currentView.equals("add")) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_main, menu);
+            return super.onCreateOptionsMenu(menu);
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override
