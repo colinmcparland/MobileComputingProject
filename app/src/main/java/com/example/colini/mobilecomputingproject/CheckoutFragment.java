@@ -46,9 +46,8 @@ public class CheckoutFragment extends Fragment {
         barcodeImage = (ImageView) myView.findViewById(R.id.barcode_image);
         upcCode = (TextView) myView.findViewById(R.id.upc_code);
         product = (TextView) myView.findViewById(R.id.item_description);
-        barcodes = getArguments().getStringArrayList("upcCodes");
+        barcodes = getArguments().getStringArrayList("upcCodes"); //here we get the ArrayList from the MainActivity, instead we should grab from db...
         final int barcodesSize = barcodes.size();
-        System.out.println(barcodesSize);
         myObject = new JSONObject();
         if(barcodes.isEmpty()){
             upcCode.setText("No Products Scanned");
@@ -100,7 +99,7 @@ public class CheckoutFragment extends Fragment {
                             currPos = 0; //set to the first
                         }
                         else{
-                            currPos++; //ekse show the next element
+                            currPos++; //else show the next element
                         }
                         if(!barcodes.isEmpty()) {
                             changeUPC(barcodes.get(currPos)); //update!

@@ -132,9 +132,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
-            String result = scanResult.getContents();
-            System.out.println(result);
-            upcCodes.add(result);
+            String result = scanResult.getContents(); //this is the UPC code of the item scanned.
+            upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
         }
         // else continue with any other code you need in the method
         //...
