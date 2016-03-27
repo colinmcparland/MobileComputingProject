@@ -18,12 +18,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -153,15 +155,41 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     {
         mydatabase.execSQL("create table if not exists list (" +
                 "id INTEGER PRIMARY KEY   AUTOINCREMENT ," +
+                "barcode text,"+
                 "product_name char(255)," +
                 "scanned int" +
                 ")");
     }
 
+    public void addNotification(final String barcode) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.additem_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText edt = (EditText) dialogView.findViewById(R.id.edit1);
+
+        dialogBuilder.setTitle("Item Not Found");
+        dialogBuilder.setMessage("The scanned item is not on our databases, do you want to add it?");
+        dialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
+                mydatabase.execSQL("insert into list (product_name,barcode, scanned) values('" + edt.getText() + "','"+barcode+"',1)");
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Toast.makeText(MainActivity.this, "Canceled", Toast.LENGTH_LONG).show();
+            }
+        });
+        AlertDialog b = dialogBuilder.create();
+        b.show();
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent intent){
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
-            String result = scanResult.getContents(); //this is the UPC code of the item scanned.
+            final String result = scanResult.getContents(); //this is the UPC code of the item scanned.
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
 
             try {
@@ -171,6 +199,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 if (c.getCount()==0)
                 {
                     // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
+                    if (item.equals("Code not found in database."))
+                    {
+                        addNotification(result);
+                        return;
+                    }
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("New Item Found");
                     builder.setMessage("The scanned item is not on your list, do you want to add it?");
@@ -178,7 +212,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            mydatabase.execSQL("insert into list (product_name, scanned) values('" + item + "',0)");
+                            mydatabase.execSQL("insert into list (product_name, scanned) values('" + item + "',1)");
                             Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
                         }
                     });

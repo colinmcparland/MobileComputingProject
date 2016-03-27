@@ -18,8 +18,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.support.v4.app.Fragment;
@@ -38,7 +40,8 @@ public class searchFragment extends Fragment {
     EditText searchfield;
     ArrayList<String> List=new ArrayList<String>();
     ArrayList<String> currentList=new ArrayList<String>();
-    ArrayList<Button> addButtons=new ArrayList<Button>();
+    ArrayList<String> currentBarcodes=new ArrayList<String>();
+    ArrayList<ImageView> addButtons=new ArrayList<ImageView>();
     SQLiteDatabase mydatabase;
 
     @Nullable
@@ -57,7 +60,13 @@ public class searchFragment extends Fragment {
                         ArrayList<String> result = retrieveSearchResult(searchfield.getText().toString());
                         int i = 0;
                         for (String e : result)
-                            ResultLayout.addView(createRow(e, i++));
+                            ResultLayout.addView(createRow(e,currentBarcodes.get(i), i++));
+                        View view = getActivity().getCurrentFocus();
+                        if (view != null) {
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
+                        searchfield.clearFocus();
                     }
                 });
 
@@ -77,16 +86,18 @@ public class searchFragment extends Fragment {
 
             org.jsoup.nodes.Document document = Jsoup.connect("http://upcdatabase.org/meta/instantsearch.php?payload="+query).get();
             Elements result=document.select(".result_title");
+            Elements barcodes=document.select(".result_code");
             addButtons.clear();
+            currentBarcodes.clear();
 
+            int i=0;
             for (org.jsoup.nodes.Element e:result)
             {
                 if(e.text().equals("No title available")) continue;
                 currentList.add(e.text());
-                Button tempButton = new Button(getActivity());
-                tempButton.setText("Add");
-                tempButton.setHeight(LinearLayout.LayoutParams.MATCH_PARENT);
-                tempButton.setBackgroundColor(Color.rgb(255, 204, 204));
+                currentBarcodes.add(barcodes.get(i++).text());
+                ImageView tempButton = new ImageView(getActivity());
+                tempButton.setImageResource(R.drawable.add);
                 //tempButton.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
                 results.add(e.text());
                 addButtons.add(tempButton);
@@ -127,7 +138,7 @@ public class searchFragment extends Fragment {
         L.setLayoutParams(param);
     }
 
-    public LinearLayout createRow(final String productName, int i)
+    public LinearLayout createRow(final String productName,final String barcode, int i)
     {
         LinearLayout Row= new LinearLayout(getActivity());
         Row.setOrientation(LinearLayout.HORIZONTAL);
@@ -138,7 +149,7 @@ public class searchFragment extends Fragment {
 
         product.setText(productName);
         product.setTextSize(16);
-        product.setWidth(600);
+        product.setWidth(650);
         product.setPadding(20, 20, 20, 20);
 
 
@@ -156,7 +167,7 @@ public class searchFragment extends Fragment {
                 new Button.OnClickListener(){
                     public void onClick(View v)
                     {
-                        mydatabase.execSQL("insert into list (product_name, scanned) values('"+productName+"',0)");
+                        mydatabase.execSQL("insert into list (product_name, barcode, scanned) values('"+productName+"','"+barcode+"',0)");
                         //List.add(currentList.get(ii));
                         Snackbar.make(v, productName+" has been added!", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();

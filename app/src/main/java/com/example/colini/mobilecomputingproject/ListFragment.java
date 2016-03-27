@@ -62,10 +62,10 @@ public class ListFragment extends Fragment {
 
         if (cursor.getCount() != 0){
             cursor.moveToFirst();
-            LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(1), Integer.parseInt(cursor.getString(2))));
+            LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(1), Integer.parseInt(cursor.getString(3))));
             while(cursor.moveToNext())
             {
-                LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(1),Integer.parseInt(cursor.getString(2))));
+                LL.addView(createRow(Integer.parseInt(cursor.getString(0)),cursor.getString(1),Integer.parseInt(cursor.getString(3))));
             }
         }
 
@@ -146,6 +146,7 @@ public class ListFragment extends Fragment {
     {
         mydatabase.execSQL("create table if not exists list (" +
                 "id INTEGER PRIMARY KEY   AUTOINCREMENT ," +
+                "barcode text,"+
                 "product_name char(255)," +
                 "scanned int" +
                 ")");
