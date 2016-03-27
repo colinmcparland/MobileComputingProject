@@ -1,7 +1,9 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -164,18 +166,35 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
             try {
                 JSONObject json = queryUPC(result);
+                final String item=json.getString("itemname");
                 Cursor c = mydatabase.rawQuery("select * from list where product_name='"+json.getString("itemname")+" and scanned = 0';",null);
                 if (c.getCount()==0)
                 {
                     // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("New Item Found");
+                    builder.setMessage("The scanned item is not on your list, do you want to add it?");
+                    //Yes Button
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mydatabase.execSQL("insert into list (product_name, scanned) values('" + item + "',0)");
+                            Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
+                        }
+                    });
 
-                    // IF (YES){
-                    mydatabase.execSQL("insert into list (product_name, scanned) values('"+json.getString("itemname")+"',1)");
-                    //}
+                    //No Button
+                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
                 }else
                 {
-                    mydatabase.execSQL("update list set scanned=1 where product_name='"+json.getString("itemname")+"';");
                     // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
+                    mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
+                    Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
 
                 }
 
