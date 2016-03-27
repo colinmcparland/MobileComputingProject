@@ -164,6 +164,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
             try {
                 JSONObject json = queryUPC(result);
+                /* check if valid first, if not valid it's not in the UPC database..
+                   if it's not in the UPC database we should save it. Maybe ask the user for
+                   information on the product to expand our application?
+                */
                 Cursor c = mydatabase.rawQuery("select * from list where product_name='"+json.getString("itemname")+" and scanned = 0';",null);
                 if (c.getCount()==0)
                 {
