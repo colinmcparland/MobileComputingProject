@@ -1,7 +1,9 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -16,12 +18,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -151,38 +155,80 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     {
         mydatabase.execSQL("create table if not exists list (" +
                 "id INTEGER PRIMARY KEY   AUTOINCREMENT ," +
+                "barcode text,"+
                 "product_name char(255)," +
                 "scanned int" +
                 ")");
     }
 
+    public void addNotification(final String barcode) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.additem_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText edt = (EditText) dialogView.findViewById(R.id.edit1);
+
+        dialogBuilder.setTitle("Item Not Found");
+        dialogBuilder.setMessage("The scanned item is not on our databases, do you want to add it?");
+        dialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
+                mydatabase.execSQL("insert into list (product_name,barcode, scanned) values('" + edt.getText() + "','"+barcode+"',1)");
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Toast.makeText(MainActivity.this, "Canceled", Toast.LENGTH_LONG).show();
+            }
+        });
+        AlertDialog b = dialogBuilder.create();
+        b.show();
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent intent){
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
-            String result = scanResult.getContents(); //this is the UPC code of the item scanned.
+            final String result = scanResult.getContents(); //this is the UPC code of the item scanned.
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
 
             try {
                 JSONObject json = queryUPC(result);
-                /* check if valid first, if not valid it's not in the UPC database..
-                   if it's not in the UPC database we should save it. Maybe ask the user for
-                   information on the product to expand our application?
-
-                   Either we add it to the API we're using, benifiting both of us or just save it for
-                   our own use.
-                */
+                final String item=json.getString("itemname");
                 Cursor c = mydatabase.rawQuery("select * from list where product_name='"+json.getString("itemname")+" and scanned = 0';",null);
                 if (c.getCount()==0)
                 {
                     // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
+                    if (item.equals("Code not found in database."))
+                    {
+                        addNotification(result);
+                        return;
+                    }
 
-                    // IF (YES){
-                    mydatabase.execSQL("insert into list (product_name, scanned) values('"+json.getString("itemname")+"',1)");
-                    //}
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("New Item Found");
+                    builder.setMessage("The scanned item is not on your list, do you want to add it?");
+                    //Yes Button
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mydatabase.execSQL("insert into list (product_name, scanned) values('" + item + "',1)");
+                            Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    //No Button
+                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
                 }else
                 {
-                    mydatabase.execSQL("update list set scanned=1 where product_name='"+json.getString("itemname")+"';");
                     // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
+                    mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
+                    Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
 
                 }
 
