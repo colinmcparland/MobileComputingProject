@@ -96,7 +96,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         upcCodes = new ArrayList<>();
         mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE ,null);
 
-
     }
 
     @Override
@@ -193,54 +192,73 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
 
             try {
-                JSONObject json = queryUPC(result);
-                final String item=json.getString("itemname");
-                Cursor c = mydatabase.rawQuery("select * from list where product_name='"+json.getString("itemname")+" and scanned = 0';",null);
-                if (c.getCount()==0)
-                {
-                    // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
-                    if (item.equals("Code not found in database."))
-                    {
-                        addNotification(result);
-                        return;
+                JSONObject json1 = queryUPC(result);
+                String itemName;
+                boolean valid = json1.getBoolean("valid"); //if true, then item is in UPC Database
+                if(!valid){
+                    //many products have an extra 0 in the upcAPI, lets try that....
+                    String zeroCode = "0"+result;
+                    JSONObject json2 = queryUPC(zeroCode);
+                    valid = json2.getBoolean("valid");
+                    if(!valid){
+                        //it really isn't in the UP DB.. we need to ask for it!
+                        String toastMSG = "Could not find " + zeroCode;
+                        Toast.makeText(getApplicationContext(), toastMSG, Toast.LENGTH_LONG).show();
                     }
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("New Item Found");
-                    builder.setMessage("The scanned item is not on your list, do you want to add it?");
-                    //Yes Button
-                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mydatabase.execSQL("insert into list (product_name, scanned) values('" + item + "',1)");
-                            Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                    //No Button
-                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                }else
-                {
-                    // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
-                    mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
-                    Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
-
+                    else{
+                        itemName = json1.getString("itemname");
+                        processItem(itemName, zeroCode);
+                    }
                 }
-
-            }catch(JSONException e)
-            {
-
+                else {
+                    itemName = json1.getString("itemname");
+                    processItem(itemName, result);
+                }
+            }catch(JSONException e) {
+                System.out.println(e);
             }
+
         }
         // else continue with any other code you need in the method
         //...
     }
 
+    public void processItem(String itemName, String upcCode){
+        final String item = itemName;
+        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + " and scanned = 0';", null);
+        if (c.getCount() == 0) {
+            // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
+            if (itemName.equals("Code not found in database.")) { //is this from UPC Database or Local DB?
+                addNotification(upcCode);
+                return;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("New Item Found");
+
+            builder.setMessage("The scanned item is not on your list, do you want to add it?");
+            //Yes Button
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mydatabase.execSQL("insert into list (product_name, scanned) values('" + item + "',1)");
+                    Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            //No Button
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+        } else {
+            // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
+            mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
+            Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
+        }
+    }
 
     /**
      *
@@ -261,10 +279,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             String line;
-            while ( (line = br.readLine()) != null)
-
-                K+=line;
-
+            while ( (line = br.readLine()) != null) {
+                K += line;
+            }
             br.close();
             is.close();
 
@@ -272,9 +289,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             e.printStackTrace();
         }
 
-
         json = new JSONObject(K);
-
         return json;
     }
 

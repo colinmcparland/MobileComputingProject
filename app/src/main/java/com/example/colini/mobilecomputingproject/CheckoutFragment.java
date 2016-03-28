@@ -118,7 +118,8 @@ public class CheckoutFragment extends Fragment {
                 return gesture.onTouchEvent(event);
             }
         });
-
+        upcCode.setText(getArguments().getString("itemname"));
+        product.setText(getArguments().getString("valid"));
         return myView;
     }
 
