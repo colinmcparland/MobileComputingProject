@@ -202,8 +202,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     valid = json2.getBoolean("valid");
                     if(!valid){
                         //it really isn't in the UP DB.. we need to ask for it!
-                        String toastMSG = "Could not find " + zeroCode;
+                        String toastMSG = "Could not find " + result;
                         Toast.makeText(getApplicationContext(), toastMSG, Toast.LENGTH_LONG).show();
+                        addNotification(result);
                     }
                     else{
                         itemName = json1.getString("itemname");
@@ -228,11 +229,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + " and scanned = 0';", null);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
-            if (itemName.equals("Code not found in database.")) { //is this from UPC Database or Local DB?
-                addNotification(upcCode);
-                return;
-            }
-
+            //removed the addNotification from here. We only enter this if the item is in the UPC Database.
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("New Item Found");
 
@@ -253,6 +250,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     dialog.dismiss();
                 }
             });
+            builder.show();
+
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
