@@ -190,43 +190,45 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if (scanResult != null) {
             final String result = scanResult.getContents(); //this is the UPC code of the item scanned.
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
-
-            try {
-                JSONObject json1 = queryUPC(result);
-                String itemName;
-                boolean valid = json1.getBoolean("valid"); //if true, then item is in UPC Database
-                if(!valid){
-                    //many products have an extra 0 in the upcAPI, lets try that....
-                    String zeroCode = "0"+result;
-                    JSONObject json2 = queryUPC(zeroCode);
-                    valid = json2.getBoolean("valid");
+            if(result != null){
+                try {
+                    JSONObject jsonResult = queryUPC(result);
+                    String itemName;
+                    boolean valid = jsonResult.getBoolean("valid"); //if true, then item is in UPC Database
                     if(!valid){
+                        //many products have an extra 0 in the upcAPI, lets try that....
+                        String zeroCode = "0"+result;
+                        JSONObject jsonZero = queryUPC(zeroCode);
+                        valid = jsonZero.getBoolean("valid");
+                        if(!valid){
                         //it really isn't in the UP DB.. we need to ask for it!
-                        String toastMSG = "Could not find " + result;
-                        Toast.makeText(getApplicationContext(), toastMSG, Toast.LENGTH_LONG).show();
-                        addNotification(result);
+                            String toastMSG = "Could not find " + result;
+                            Toast.makeText(getApplicationContext(), toastMSG, Toast.LENGTH_LONG).show();
+                            addNotification(result);
+                        }
+                        else{
+                            itemName = jsonResult.getString("itemname");
+                            processItem(itemName, zeroCode);
+                        }
                     }
-                    else{
-                        itemName = json1.getString("itemname");
-                        processItem(itemName, zeroCode);
+                    else {
+                        itemName = jsonResult.getString("itemname");
+                        processItem(itemName, result);
                     }
                 }
-                else {
-                    itemName = json1.getString("itemname");
-                    processItem(itemName, result);
+                catch(JSONException e) {
+                    System.out.println(e);
                 }
-            }catch(JSONException e) {
-                System.out.println(e);
-            }
 
-        }
+            }
         // else continue with any other code you need in the method
         //...
+         }
     }
 
     public void processItem(String itemName, String upcCode){
         final String item = itemName;
-        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + " and scanned = 0';", null);
+        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0';", null);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
@@ -250,13 +252,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     dialog.dismiss();
                 }
             });
-            builder.show();
+            builder.create().show();
 
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
+            Toast.makeText(getApplicationContext(), "Before DB Update...", Toast.LENGTH_LONG).show();
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
             Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
         }
+        //after this we should also refresh the list view...
     }
 
     /**
