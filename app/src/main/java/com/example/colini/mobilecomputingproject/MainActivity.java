@@ -170,7 +170,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         dialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
-                mydatabase.execSQL("insert into list (product_name,barcode, scanned) values('" + edt.getText() + "','"+barcode+"',1)");
+                mydatabase.execSQL("insert into list (product_name,barcode, scanned) values('" + edt.getText() + "','" + barcode + "',1)");
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -228,7 +228,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void processItem(String itemName, String upcCode){
         final String item = itemName;
 
-        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0';", null);
+        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0;", null);
         System.out.println("Processing item... " + itemName + " " + upcCode);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
@@ -252,6 +252,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
+
                 }
             });
             AlertDialog msg = builder.create();
@@ -259,12 +260,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             Toast.makeText(getApplicationContext(), "Need to add to database", Toast.LENGTH_LONG).show();
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
-            System.out.println("Item should be checked off list....");
-            Toast.makeText(getApplicationContext(), "Before DB Update...", Toast.LENGTH_LONG).show();
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
             Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
+
+
         }
         //after this we should also refresh the list view...
+        //getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
+
 
 
 
