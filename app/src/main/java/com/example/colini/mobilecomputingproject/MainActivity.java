@@ -195,13 +195,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     JSONObject jsonResult = queryUPC(result);
                     String itemName;
                     boolean valid = jsonResult.getBoolean("valid"); //if true, then item is in UPC Database
+                    System.out.println("First try valid = "+vslid);
                     if(!valid){
                         //many products have an extra 0 in the upcAPI, lets try that....
                         String zeroCode = "0"+result;
                         JSONObject jsonZero = queryUPC(zeroCode);
                         valid = jsonZero.getBoolean("valid");
+                        System.out.println("Zero code valid = "+valid);
                         if(!valid){
-                        //it really isn't in the UP DB.. we need to ask for it!
+                        //it really isn't in the UPC DB.. we need to ask for it!
                             String toastMSG = "Could not find " + result;
                             Toast.makeText(getApplicationContext(), toastMSG, Toast.LENGTH_LONG).show();
                             addNotification(result);
@@ -228,10 +230,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void processItem(String itemName, String upcCode){
         final String item = itemName;
-        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0';", null);
+        Cursor c = mydatabase.rawQuery("select * from list where product_name=" + item + " and scanned = 0';", null);
+        System.out.println("Processing item... "+itemName+" "+upcCode);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
+            System.out.println("Count is zero, new item!");
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("New Item Found");
 
@@ -252,15 +256,20 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     dialog.dismiss();
                 }
             });
-            builder.create().show();
+            AlertDialog msg = builder.create();
+            msg.show();
 
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
+            System.out.println("Item should be checked off list....");
             Toast.makeText(getApplicationContext(), "Before DB Update...", Toast.LENGTH_LONG).show();
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
             Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
         }
         //after this we should also refresh the list view...
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
+
+
     }
 
     /**
