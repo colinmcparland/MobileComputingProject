@@ -230,7 +230,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void processItem(String itemName, String upcCode){
         final String item = itemName;
-        Cursor c = mydatabase.rawQuery("select * from list where product_name=" + item + " and scanned = 0';", null);
+        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0';", null);
         System.out.println("Processing item... "+itemName+" "+upcCode);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
