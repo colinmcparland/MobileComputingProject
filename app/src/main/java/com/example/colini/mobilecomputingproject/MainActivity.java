@@ -86,9 +86,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, navi_list));
         listView.setOnItemClickListener(this);
 
-
-
-
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -154,7 +151,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     {
         mydatabase.execSQL("create table if not exists list (" +
                 "id INTEGER PRIMARY KEY   AUTOINCREMENT ," +
-                "barcode text,"+
+                "barcode text," +
                 "product_name char(255)," +
                 "scanned int" +
                 ")");
@@ -204,17 +201,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         System.out.println("Zero code valid = "+valid);
                         if(!valid){
                         //it really isn't in the UPC DB.. we need to ask for it!
-                            String toastMSG = "Could not find " + result;
-                            Toast.makeText(getApplicationContext(), toastMSG, Toast.LENGTH_LONG).show();
                             addNotification(result);
                         }
                         else{
-                            itemName = jsonResult.getString("itemname");
+                            itemName = jsonZero.getString("itemname");
+                            Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                             processItem(itemName, zeroCode);
                         }
                     }
                     else {
                         itemName = jsonResult.getString("itemname");
+                        Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                         processItem(itemName, result);
                     }
                 }
@@ -230,12 +227,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void processItem(String itemName, String upcCode){
         final String item = itemName;
+
         Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0';", null);
         System.out.println("Processing item... " + itemName + " " + upcCode);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
-            System.out.println("Count is zero, new item!");
+           System.out.println("Count is zero, new item!");
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("New Item Found");
 
@@ -258,7 +256,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             });
             AlertDialog msg = builder.create();
             msg.show();
-
+            Toast.makeText(getApplicationContext(), "Need to add to database", Toast.LENGTH_LONG).show();
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
             System.out.println("Item should be checked off list....");
@@ -267,7 +265,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
         }
         //after this we should also refresh the list view...
-        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
+
 
 
     }
