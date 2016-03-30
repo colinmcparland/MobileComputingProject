@@ -195,7 +195,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     JSONObject jsonResult = queryUPC(result);
                     String itemName;
                     boolean valid = jsonResult.getBoolean("valid"); //if true, then item is in UPC Database
-                    System.out.println("First try valid = "+vslid);
+                    System.out.println("First try valid = " + valid);
                     if(!valid){
                         //many products have an extra 0 in the upcAPI, lets try that....
                         String zeroCode = "0"+result;
@@ -231,7 +231,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void processItem(String itemName, String upcCode){
         final String item = itemName;
         Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0';", null);
-        System.out.println("Processing item... "+itemName+" "+upcCode);
+        System.out.println("Processing item... " + itemName + " " + upcCode);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
