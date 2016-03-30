@@ -48,7 +48,7 @@ public class View_Detial extends Fragment {
         cursor.moveToFirst();
 
         if(cursor.getCount() != 0)
-            textView.setText("Name: " + cursor.getString(1));
+            textView.setText("Name: " + cursor.getString(2));
         else
             textView.setText("No value exists in database");
 
