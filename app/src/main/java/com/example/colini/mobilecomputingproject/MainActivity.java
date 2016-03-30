@@ -1,6 +1,7 @@
 package com.example.colini.mobilecomputingproject;
 
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -252,7 +254,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
-
                 }
             });
             AlertDialog msg = builder.create();
@@ -304,6 +305,16 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         json = new JSONObject(K);
         return json;
+    }
+
+    public void refreshListView(){
+        Fragment currentFragement = getSupportFragmentManager().findFragmentByTag("listTag");
+        android.support.v4.app.FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction();
+        fragTrans.detach(currentFragement);
+        fragTrans.attach(currentFragement);
+        fragTrans.commit();
+
+
     }
 
     private Detail_Data detail_data;

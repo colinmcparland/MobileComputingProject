@@ -5,7 +5,6 @@
     <string name="shoppingview_name">Shopping View</string>
 
     <string-array name="navi_list">
-        <item>Detail View</item>
         <item>Shopping View</item>
         <item>History View</item>
         <item>List View</item>
@@ -15,4 +14,5 @@
     <string name="on">Navi is On</string>
     <string name="off">Navi is Off</string>
     <string name="title_activity_history">HistoryActivity</string>
+    <string name="listTag">ListView</string>
 </resources>
