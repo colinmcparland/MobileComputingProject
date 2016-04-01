@@ -1,5 +1,8 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -40,6 +43,8 @@ public class CheckoutFragment extends Fragment {
     int currPos = 0;
     JSONObject myObject;
     View myView;
+    SQLiteDatabase mydatabase;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.checkoutview_layout, container, false);
@@ -48,6 +53,8 @@ public class CheckoutFragment extends Fragment {
         product = (TextView) myView.findViewById(R.id.item_description);
         barcodes = getArguments().getStringArrayList("upcCodes"); //here we get the ArrayList from the MainActivity, instead we should grab from db...
         final int barcodesSize = barcodes.size();
+        mydatabase = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
+
         myObject = new JSONObject();
         if(barcodes.isEmpty()){
             upcCode.setText("No Products Scanned");
@@ -163,6 +170,15 @@ public class CheckoutFragment extends Fragment {
             }
         }
         return bm; //return Bitmap to use with ImageView
+    }
+
+
+    public Cursor getItems()
+    {
+        Cursor result=mydatabase.rawQuery("select distinct(product_name) ,count(product_name) as quant from list where scanned=1 group by product_name;", null);
+        return result;
+
+
     }
 
     /**
