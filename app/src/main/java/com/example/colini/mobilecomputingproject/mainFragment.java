@@ -34,7 +34,7 @@ public class mainFragment extends Fragment {
                 MainActivity myaty = (MainActivity) getActivity();
 
 
-                textView.setText("Scanned Amount: " + myaty.gettotal());
+                //textView.setText("Scanned Amount: " + myaty.gettotal());
                 IntentIntegrator i = new IntentIntegrator(getActivity()); //between this line and i.initiateScan() we can edit the Scanner
                 i.initiateScan();
             }
