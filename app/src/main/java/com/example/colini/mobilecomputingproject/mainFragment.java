@@ -27,16 +27,14 @@ public class mainFragment extends Fragment {
 
         button = (Button) rootView.findViewById(R.id.buttoninMain);
         textView = (TextView) rootView.findViewById(R.id.MaintextView);
-        button.setText("Send a sample to Detail fragment");
-        textView.setText("Not send");
-
+        button.setText("Scan An Item");
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Detail_Data x = new Detail_Data("T-Love","Pets Food","$25","This is a good food!","233333333");
                 MainActivity myaty = (MainActivity) getActivity();
-                myaty.setDetail(x);
-                textView.setText("Done!");
+
+
+                textView.setText("Scanned Amount: " + myaty.gettotal());
                 IntentIntegrator i = new IntentIntegrator(getActivity()); //between this line and i.initiateScan() we can edit the Scanner
                 i.initiateScan();
             }
