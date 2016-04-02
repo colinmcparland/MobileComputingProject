@@ -1,6 +1,7 @@
 package com.example.colini.mobilecomputingproject;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
@@ -106,9 +107,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         * go to string.xml file to check out the string-array entry.
         *
         * */
-        if (navi_list[position].equalsIgnoreCase("Detail View")){
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).addToBackStack("DetailFragment").commit();
-        }
+//        if (navi_list[position].equalsIgnoreCase("Detail View")){
+//            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).addToBackStack("DetailFragment").commit();
+//        }
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
             IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
             i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
@@ -309,7 +310,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void refreshListView(){
         Fragment currentFragement = getSupportFragmentManager().findFragmentByTag("listTag");
-        android.support.v4.app.FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction();
+        android.support.v4.app.FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction().addToBackStack("ListRefresh");
         fragTrans.detach(currentFragement);
         fragTrans.attach(currentFragement);
         fragTrans.commit();
@@ -350,5 +351,19 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         actionBarDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onBackPressed() {
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() >0){
+            fm.popBackStack();
+           // getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, fm.popBackStack()).addToBackStack("DetailFragment").commit();
+            System.out.println("POP UP");
+
+
+        }else{
+            super.onBackPressed();
+        }
     }
 }

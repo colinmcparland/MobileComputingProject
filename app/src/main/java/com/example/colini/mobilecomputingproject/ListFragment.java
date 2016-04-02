@@ -46,7 +46,7 @@ public class ListFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new searchFragment()).commit();
+                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new searchFragment()).addToBackStack("SearchFragment").commit();
             }
         });
 
@@ -129,7 +129,7 @@ public class ListFragment extends Fragment {
                         View_Detial fragobj = new View_Detial();
                         fragobj.setArguments(bundle);
 
-                        getFragmentManager().beginTransaction().replace(R.id.mainContainer, fragobj).commit();
+                        getFragmentManager().beginTransaction().replace(R.id.mainContainer, fragobj).addToBackStack("listView").commit();
                     }
                 }
         );
