@@ -51,7 +51,7 @@ public class CheckoutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
         myCart = new ArrayList<Product>();
-        Cursor c =  myDb.rawQuery("select distinct(barcode), itemname, count(barcode) as quant from list where scanned = 1 group by barcode",null);
+        Cursor c =  myDb.rawQuery("select distinct(barcode), product_name, count(barcode) as quant from list where scanned = 1 group by barcode",null);
         try {
             while (c.moveToNext()) {
                 if(myCart == null){
