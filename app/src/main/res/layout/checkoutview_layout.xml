@@ -11,12 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ImageView
-            android:layout_width="600dp"
-            android:layout_height="300dp"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
             android:layout_centerInParent="true"
             android:id="@+id/barcode_image"
             android:background="#000"
-            android:padding="1dp"
+            android:padding="3dp"
             />
         <TextView
             android:layout_width="match_parent"
