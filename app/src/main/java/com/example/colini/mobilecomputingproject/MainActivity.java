@@ -461,7 +461,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         super.onPostExecute(aVoid);
                     }
                 }.execute();
-
+                locationManager.removeUpdates(this);
             }
         }
         catch(Exception e){
@@ -484,6 +484,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         }
     }
+
+
+    /*
+        These functions are here to comply with LocationListener. We do not actually use them.
+         */
     @Override
     public void onLocationChanged(Location location) {
 

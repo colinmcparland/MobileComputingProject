@@ -1,5 +1,8 @@
 package com.example.colini.mobilecomputingproject;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -35,19 +38,48 @@ public class CheckoutFragment extends Fragment {
     ImageView barcodeImage;
     TextView upcCode;
     TextView product;
+    TextView quantity;
+    TextView numProducts;
     ArrayList<String> barcodes;
     Bitmap bitmapForBarcode;
     int currPos = 0;
     JSONObject myObject;
     View myView;
+    SQLiteDatabase myDb;
+    ArrayList <Product> myCart;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
+        myCart = new ArrayList<Product>();
+        Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant from list where scanned = 1 group by product_name",null);
+        try {
+            while (c.moveToNext()) {
+                if(myCart.get(0) == null){
+                    myCart.set(0, new Product(c.getString(0), c.getInt(1)));
+                }
+                else{
+                    myCart.add(new Product(c.getString(0), c.getInt(1)));
+                }
+            }
+        }
+        finally{
+            c.close();
+        }
+
         myView = inflater.inflate(R.layout.checkoutview_layout, container, false);
         barcodeImage = (ImageView) myView.findViewById(R.id.barcode_image);
         upcCode = (TextView) myView.findViewById(R.id.upc_code);
         product = (TextView) myView.findViewById(R.id.item_description);
+        quantity = (TextView) myView.findViewById(R.id.quant);
+        numProducts = (TextView) myView.findViewById(R.id.numProducts);
 
         myObject = new JSONObject();
+
+        final int maxProducts = myCart.size();
+        if(maxProducts != 0){
+            changeUPC(myCart.get(0));
+        }
+
 
 
         final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener(){
@@ -69,8 +101,14 @@ public class CheckoutFragment extends Fragment {
                         If the difference between the x values of the initial position and final position
                         of the swipe is greater than the minimum distance, and the swipe is fast enough register this as
                         a left swipe.
-
-                         */
+                        */
+                        if(currPos == 0){
+                            currPos = maxProducts - 1;
+                        }
+                        else{
+                            currPos--;
+                        }
+                        changeUPC(myCart.get(currPos));
 
                     } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {//swipe right
                                                 /*
@@ -79,6 +117,13 @@ public class CheckoutFragment extends Fragment {
                         a right swipe.
 
                          */
+                        if(currPos == maxProducts - 1){
+                            currPos = 0;
+                        }
+                        else{
+                            currPos++;
+                        }
+                        changeUPC(myCart.get(currPos));
 
 
                     }
@@ -99,7 +144,11 @@ public class CheckoutFragment extends Fragment {
         return myView;
     }
 
-    public void changeUPC(String code){
+    public void changeUPC(Product p){
+        String code = p.barcode;
+        int quant = p.quantity;
+        String quantity_text = "Number of Products: " + quant;
+        quantity.setText(quantity_text);
         upcCode.setText(code);
         bitmapForBarcode = encodeBarcodeBitmap(code, 600, 300); //need to change BitMatrix to Bitmap
         barcodeImage.setImageBitmap(bitmapForBarcode);
@@ -141,8 +190,7 @@ public class CheckoutFragment extends Fragment {
         return bm; //return Bitmap to use with ImageView
     }
 
-    /**
-     *
+    /*
      * @param barcode
      * @return JSON Object
      * @throws JSONException
@@ -177,5 +225,12 @@ public class CheckoutFragment extends Fragment {
         return json;
     }
 
-
+    protected class Product{
+        String barcode;
+        int quantity;
+        Product(String code, int quant){
+            barcode = code;
+            quantity = quant;
+        }
+    }
 }
