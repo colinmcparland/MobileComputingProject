@@ -6,14 +6,25 @@
     android:tag="@string/listTag"
     tools:context="com.example.zalan.listview.MainActivity" android:orientation="vertical">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Search for an item"
-        android:id="@+id/search_list_button"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="51dp">
+
+        <Button
+            android:layout_width="179dp"
+            android:layout_height="wrap_content"
+            android:text="Search for an item"
+            android:id="@+id/search_list_button"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear List"
+            android:id="@+id/clear" />
+    </LinearLayout>
 
     <ScrollView android:layout_width="fill_parent"
         android:layout_height="match_parent"
