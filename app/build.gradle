@@ -25,10 +25,10 @@ repositories {
     maven {
         url 'https://raw.github.com/embarkmobile/zxing-android-minimal/mvn-repo/maven-repository/'
     }
-    maven{
+    maven {
         url 'com.google.zxing'
     }
-    maven{
+    maven {
         url 'se.walkercrou'
     }
 }
@@ -36,19 +36,21 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.11'
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:design:23.2.0'
 
     // Supports Android 4.0.3 and later (API level 15)
-    compile 'com.embarkmobile:zxing-android-minimal:2.0.0@aar'
+    
 
     // Convenience library to launch the scanning and encoding Activities.
     // It automatically picks the best scanning library from the above two, depending on the
     // Android version and what is available.
+    
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:design:23.2.1'
+    compile 'com.embarkmobile:zxing-android-minimal:2.0.0@aar'
     compile 'com.embarkmobile:zxing-android-integration:2.0.0@aar'
-
     compile 'org.jsoup:jsoup:1.8.3'
     compile 'com.google.zxing:core:3.2.1'
     compile 'se.walkercrou:google-places-api-java:2.1.2'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
+    compile 'com.android.support:support-v4:23.2.1'
 }

@@ -15,4 +15,7 @@
     <string name="off">Navi is Off</string>
     <string name="title_activity_history">HistoryActivity</string>
     <string name="listTag">ListView</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
