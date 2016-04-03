@@ -404,19 +404,19 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             else {
                 if (networkEnabled) { //first check for location via network
                     locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.myLooper());
-                    if (locationManager != null){
+                    if (locationManager != null) {
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if(myLocation != null) {
+                        if (myLocation != null) {
                             lat = myLocation.getLatitude();
                             lon = myLocation.getLongitude();
                         }
                     }
                 }
-                if(gpsEnabled){ //then check with GPS
+                if (gpsEnabled) { //then check with GPS
                     locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, Looper.myLooper());
-                    if(locationManager != null){
+                    if (locationManager != null) {
                         myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                        if(myLocation != null) {
+                        if (myLocation != null) {
                             lat = myLocation.getLatitude();
                             lon = myLocation.getLongitude();
                         }
@@ -425,12 +425,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 String out = "Lat: " + lat + " Long: " + lon;
                 System.out.println(out);
 
-                new AsyncTask<Void, Void, Void>(){
+                new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... params) {
                         List<Place> places = client.getNearbyPlaces(lat, lon, 25);
                         int placesCount = places.size();
-                        for(int i = 0; i < placesCount; i++) {
+                        for (int i = 0; i < placesCount; i++) {
                             Place currentPlace = places.get(i);
                             List<String> types = currentPlace.getTypes();
                             int typeCount = types.size();
@@ -458,7 +458,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         super.onPostExecute(aVoid);
                     }
                 }.execute();
+                locationManager.removeUpdates(this);
+
             }
+
         }
         catch(Exception e){
             e.printStackTrace();
