@@ -51,14 +51,14 @@ public class CheckoutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
         myCart = new ArrayList<Product>();
-        Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant from list where scanned = 1 group by barcode",null);
+        Cursor c =  myDb.rawQuery("select distinct(barcode), itemname, count(barcode) as quant from list where scanned = 1 group by barcode",null);
         try {
             while (c.moveToNext()) {
                 if(myCart == null){
-                    myCart.set(0, new Product(c.getString(0), c.getInt(1)));
+                    myCart.set(0, new Product(c.getString(0), c.getString(1), c.getInt(2)));
                 }
                 else{
-                    myCart.add(new Product(c.getString(0), c.getInt(1)));
+                    myCart.add(new Product(c.getString(0), c.getString(1), c.getInt(2)));
                 }
             }
         }
@@ -148,20 +148,15 @@ public class CheckoutFragment extends Fragment {
     public void changeUPC(Product p){
         String code = p.barcode;
         int quant = p.quantity;
+        String title = p.itemTitle;
         String quantity_text = "Number of Products: " + quant;
+        int height = barcodeImage.getHeight();
+        int width = barcodeImage.getWidth();
         quantity.setText(quantity_text);
         upcCode.setText(code);
-        bitmapForBarcode = encodeBarcodeBitmap(code, 600, 300); //need to change BitMatrix to Bitmap
+        bitmapForBarcode = encodeBarcodeBitmap(code, width, height); //need to change BitMatrix to Bitmap
         barcodeImage.setImageBitmap(bitmapForBarcode);
-        try{ //get the name of the item
-            myObject = queryUPC(code);
-            String productTitle = myObject.getString("itemname");
-            product.setText(productTitle);
-        }
-        catch (JSONException e){
-            e.printStackTrace();
-        }
-
+        product.setText(title);
     }
 
     private Bitmap encodeBarcodeBitmap(String code, int width, int height){
@@ -228,9 +223,11 @@ public class CheckoutFragment extends Fragment {
 
     protected class Product{
         String barcode;
+        String itemTitle;
         int quantity;
-        Product(String code, int quant){
+        Product(String code, String title, int quant){
             barcode = code;
+            itemTitle = title;
             quantity = quant;
         }
     }
