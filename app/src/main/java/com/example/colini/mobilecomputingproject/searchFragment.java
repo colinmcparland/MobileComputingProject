@@ -1,9 +1,11 @@
 package com.example.colini.mobilecomputingproject;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.inputmethodservice.KeyboardView;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -16,6 +18,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -35,7 +38,7 @@ import java.util.ArrayList;
 /**
  * Created by Colini on 16-03-20.
  */
-public class searchFragment extends Fragment {
+public class searchFragment extends Fragment implements View.OnFocusChangeListener {
     Button searchButton;
     EditText searchfield;
     ArrayList<String> List=new ArrayList<String>();
@@ -43,6 +46,20 @@ public class searchFragment extends Fragment {
     ArrayList<String> currentBarcodes=new ArrayList<String>();
     ArrayList<ImageView> addButtons=new ArrayList<ImageView>();
     SQLiteDatabase mydatabase;
+
+
+
+
+    public void onFocusChange(View v, boolean hasFocus){
+
+        if(!hasFocus) {
+
+            InputMethodManager imm =  (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+        }
+    }
+
 
     @Nullable
     @Override
@@ -52,6 +69,7 @@ public class searchFragment extends Fragment {
         createSearchBar(rootView);
         mydatabase = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
 
+
         searchButton.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
@@ -59,8 +77,14 @@ public class searchFragment extends Fragment {
                         ResultLayout.removeAllViews();
                         ArrayList<String> result = retrieveSearchResult(searchfield.getText().toString());
                         int i = 0;
+                        if (result.size()==0)
+                        {
+                            TextView temp= new TextView(getActivity());
+                            temp.setText("Could not find the item");
+                            ResultLayout.addView(temp);
+                        }
                         for (String e : result)
-                            ResultLayout.addView(createRow(e,currentBarcodes.get(i), i++));
+                            ResultLayout.addView(createRow(e, currentBarcodes.get(i), i++));
                         View view = getActivity().getCurrentFocus();
                         if (view != null) {
                             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -69,17 +93,26 @@ public class searchFragment extends Fragment {
                         searchfield.clearFocus();
                     }
                 });
-
-
+        searchfield.setId(View.NO_ID);
         return rootView;
     }
 
+
+
+
+
     public ArrayList<String> retrieveSearchResult(String query)
     {
+
         ArrayList<String> results= new ArrayList<>();
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        addButtons.clear();
+        currentBarcodes.clear();
 
+
+
+        // Force the Internet traffic to run on the same Main Thread..
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
         try {
@@ -87,8 +120,7 @@ public class searchFragment extends Fragment {
             org.jsoup.nodes.Document document = Jsoup.connect("http://upcdatabase.org/meta/instantsearch.php?payload="+query).get();
             Elements result=document.select(".result_title");
             Elements barcodes=document.select(".result_code");
-            addButtons.clear();
-            currentBarcodes.clear();
+
 
             int i=0;
             for (org.jsoup.nodes.Element e:result)
@@ -106,6 +138,31 @@ public class searchFragment extends Fragment {
 
         } catch (Exception e) {
             e.printStackTrace();
+
+
+            //  TO DO  >>  Implement the history table;
+            //  check if the product exists in the cache (HISTORY) first
+            //
+
+            /*
+            Cursor c = mydatabase.rawQuery("select * from history where product_name='"+query+"' or barcode='"+query+"'" ,null);
+            if (c.getCount()>0)
+            {
+
+                do {
+                    currentList.add(c.getString(1));
+                    currentBarcodes.add(c.getString(2));
+                    ImageView tempButton = new ImageView(getActivity());
+                    tempButton.setImageResource(R.drawable.add);
+                    //tempButton.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
+                    results.add(c.getString(1));
+                    addButtons.add(tempButton);
+
+                }while(c.moveToNext());
+                return results;
+            }
+
+            */
         }
         return results;
     }
@@ -114,18 +171,44 @@ public class searchFragment extends Fragment {
     {
         LinearLayout L = (LinearLayout) view.findViewById(R.id.searchContainer);
         searchButton = new Button(getActivity());
+        ImageView cancel=new ImageView(getActivity());
         LinearLayout.LayoutParams param=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        param.setMargins(0,0,0,10);
+        param.setMargins(0, 0, 0, 10);
+
+        cancel.setImageResource(R.drawable.back);
         searchButton.setText("Search");
         searchfield = new EditText(getActivity());
-        searchfield.setWidth(600);
+        searchfield.setWidth(500);
         searchfield.setHint("Type an item name ..");
         searchfield.setSingleLine(true);
         searchfield.setHeight(45);
         searchfield.setPadding(0, 0, 0, 0);
         searchButton.setPadding(0, 0, 0, 0);
+
+
+
+        cancel.setPadding(0, 0, 0, 0);
+        cancel.setPadding(0, 0, 0, 0);
+
+        cancel.setOnClickListener(
+
+                new Button.OnClickListener() {
+                    public void onClick(View v) {
+                        View view = getActivity().getCurrentFocus();
+                        if (view != null) {
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
+                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("SearchFragment").commit();
+                    }
+                }
+
+        );
+
+        L.addView(cancel, param);
         L.addView(searchfield, param);
         L.addView(searchButton, param);
+
         GradientDrawable border = new GradientDrawable();
         border.setColor(0xFFFFFFFF); //white background
         border.setStroke(1, Color.GRAY); //black border with full opacity

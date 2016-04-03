@@ -69,6 +69,21 @@ public class ListFragment extends Fragment {
             }
         }
 
+
+
+        Button clear=(Button) rootView.findViewById(R.id.clear);
+        clear.setTextColor(Color.RED);
+        clear.setOnClickListener(
+                new Button.OnClickListener(){
+                    public void onClick(View v){
+                        mydatabase.execSQL("delete from list");
+                        Snackbar.make(v, "List has been successfully cleared!", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                        getFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
+                    }
+                }
+        );
+
         return rootView;
     }
 

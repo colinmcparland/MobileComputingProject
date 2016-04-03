@@ -169,7 +169,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         final EditText edt = (EditText) dialogView.findViewById(R.id.edit1);
 
         dialogBuilder.setTitle("Item Not Found");
-        dialogBuilder.setMessage("The scanned item is not on our databases, do you want to add it?");
+        dialogBuilder.setMessage("The scanned item is not in our databases, do you want to add it?");
         dialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
@@ -237,7 +237,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
            System.out.println("Count is zero, new item!");
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("New Item Found");
 
             builder.setMessage("The scanned item is not on your list, do you want to add it?");
