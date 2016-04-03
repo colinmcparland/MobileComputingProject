@@ -284,10 +284,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public JSONObject queryUPC(String barcode) throws JSONException
     {
         JSONObject json;
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
         String K="";
+
         try {
             URL url = new URL("http://api.upcdatabase.org/json/72b665bccfa4c65025f18e2be5bd2e65/"+barcode);
             InputStream is = url.openStream();
@@ -302,13 +304,31 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         } catch (Exception e) {
             e.printStackTrace();
+            // if the no internet..
+            /*
+            Cursor c = mydatabase.rawQuery("select * from history where barcode = '"+barcode+"'", null);
+            if (c.getCount()==0)
+            {
+                K="{" +
+                        "\"valid\":\"true\"," +
+                        "\"number\":\""+barcode+"\"," +
+                        "\"itemname\":\""+c.getString(2)+"\"," +
+                        "\"alias\":\"\"," +
+                        "\"description\":\"\"," +
+                        "\"avg_price\":\"\"," +
+                        "\"rate_up\":0," +
+                        "\"rate_down\":0" +
+                        "}";
+            }
+            */
+
         }
 
         json = new JSONObject(K);
         return json;
     }
 
-    public void refreshListView(){
+    public void refreshListView() {
         Fragment currentFragement = getSupportFragmentManager().findFragmentByTag("listTag");
         android.support.v4.app.FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction().addToBackStack("ListRefresh");
         fragTrans.detach(currentFragement);
