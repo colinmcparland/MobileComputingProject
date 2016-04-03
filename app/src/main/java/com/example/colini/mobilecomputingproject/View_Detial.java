@@ -83,7 +83,10 @@ public class View_Detial extends Fragment {
             @Override
             public void onClick(View v) {
                 mydatabase.execSQL("delete from list where id = " + id);
-                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
+
+                //pop this fragment out and back to the previous fragment.
+                getFragmentManager().popBackStack();
+                //getFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("Frame").commit();
             }
         });
 
