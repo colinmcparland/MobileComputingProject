@@ -465,7 +465,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         super.onPostExecute(aVoid);
                     }
                 }.execute();
-                locationManager.removeUpdates(this);
+
             }
         }
         catch(Exception e){

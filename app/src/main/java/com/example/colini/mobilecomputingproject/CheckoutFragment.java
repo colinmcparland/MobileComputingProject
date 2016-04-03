@@ -55,10 +55,10 @@ public class CheckoutFragment extends Fragment {
         try {
             while (c.moveToNext()) {
                 if(myCart == null){
-                    myCart.set(0, new Product(c.getString(0), "Test title", c.getInt(2)));
+                    myCart.set(0, new Product(c.getString(0), "Test title", c.getInt(1)));
                 }
                 else{
-                    myCart.add(new Product(c.getString(0), "Test title", c.getInt(2)));
+                    myCart.add(new Product(c.getString(0), "Test title", c.getInt(1)));
                 }
             }
         }
@@ -78,8 +78,12 @@ public class CheckoutFragment extends Fragment {
         final int maxProducts = myCart.size();
         if(maxProducts != 0){
             changeUPC(myCart.get(0));
+            String out = "1 / "+maxProducts;
+            numProducts.setText(out);
         }
         else{
+            numProducts.setText("No Items Scanned");
+            barcodeImage.setBackgroundColor(Color.WHITE);
         }
 
 
@@ -134,8 +138,11 @@ public class CheckoutFragment extends Fragment {
                     System.out.println(e); //hope not!
                 }
                 int pos = currPos + 1;
-                String progress = pos + " / " +maxProducts;
-                numProducts.setText(progress);
+                if(pos >= 0 && maxProducts > 0){
+                    String progress = pos + " / " +maxProducts;
+                    numProducts.setText(progress);
+                }
+
                 return super.onFling(e1, e2, velocityX, velocityY);
             }
         });
