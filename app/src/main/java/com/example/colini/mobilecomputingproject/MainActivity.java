@@ -25,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -152,6 +153,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (actionBarDrawerToggle.onOptionsItemSelected(item)){
+            View view = getCurrentFocus();
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
             return true;
         }
         if (item.getItemId() == R.id.action_settings){
@@ -217,7 +223,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         valid = jsonZero.getBoolean("valid");
                         System.out.println("Zero code valid = "+valid);
                         if(!valid){
-                        //it really isn't in the UPC DB.. we need to ask for it!
+                            //it really isn't in the UPC DB.. we need to ask for it!
                             addNotification(result);
                         }
                         else{
@@ -237,9 +243,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 }
 
             }
-        // else continue with any other code you need in the method
-        //...
-         }
+            // else continue with any other code you need in the method
+            //...
+        }
     }
 
     public void processItem(String itemName, String upcCode){
@@ -250,7 +256,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
-           System.out.println("Count is zero, new item!");
+            System.out.println("Count is zero, new item!");
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("New Item Found");
 
@@ -372,7 +378,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         if (fm.getBackStackEntryCount() >0){
             fm.popBackStack();
-           // getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, fm.popBackStack()).addToBackStack("DetailFragment").commit();
+            // getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, fm.popBackStack()).addToBackStack("DetailFragment").commit();
             System.out.println("POP UP");
 
 
