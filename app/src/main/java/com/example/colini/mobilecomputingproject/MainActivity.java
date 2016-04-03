@@ -334,15 +334,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         return json;
     }
 
-    public void refreshListView(){
-        Fragment currentFragement = getSupportFragmentManager().findFragmentByTag("listTag");
-        android.support.v4.app.FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction().addToBackStack("ListRefresh");
-        fragTrans.detach(currentFragement);
-        fragTrans.attach(currentFragement);
-        fragTrans.commit();
-
-
-    }
 
     private Detail_Data detail_data;
     public void setDetail(Detail_Data x){
@@ -521,6 +512,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if(!closedFromScan) {
             getLocation();
             closedFromScan = true;
+        }
+        else{
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
+
         }
     }
 }
