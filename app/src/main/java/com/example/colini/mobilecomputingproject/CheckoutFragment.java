@@ -51,10 +51,10 @@ public class CheckoutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
         myCart = new ArrayList<Product>();
-        Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant from list where scanned = 1 group by product_name",null);
+        Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant from list where scanned = 1 group by barcode",null);
         try {
             while (c.moveToNext()) {
-                if(myCart.get(0) == null){
+                if(myCart == null){
                     myCart.set(0, new Product(c.getString(0), c.getInt(1)));
                 }
                 else{
@@ -79,6 +79,7 @@ public class CheckoutFragment extends Fragment {
         if(maxProducts != 0){
             changeUPC(myCart.get(0));
         }
+
 
 
 
