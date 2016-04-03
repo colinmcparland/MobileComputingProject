@@ -11,7 +11,13 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -44,10 +50,15 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Manifest;
 
-public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
+import se.walkercrou.places.GooglePlaces;
+import se.walkercrou.places.Place;
+
+public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener, LocationListener {
     //finished the view with fragment and set up a navi
     private DrawerLayout drawerLayout;
     private ListView listView;
@@ -56,24 +67,50 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private int shortToast_time = 500;
     private Bundle bundle;
     private int codesLength = 0;
-    private ArrayList <String> upcCodes;
+    private ArrayList<String> upcCodes;
     SQLiteDatabase mydatabase;
-    public static String currentView="";
+    public static String currentView = "";
+
+
+
+    /*
+    The following is for the GPS Location. Was unable to make another class to handle this, I need
+    to ask for permission in the activity.
+     */
+
+    boolean startInStore;
+    boolean gpsEnabled;
+    boolean networkEnabled;
+    boolean canGetLocation;
+
+    LocationManager locationManager;
+    Location myLocation;
+    double lat;
+    double lon;
+
+
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+
+    GooglePlaces client;
+    Place currentPlace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        bundle = new Bundle();
-        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new mainFragment()).addToBackStack("mainFragment").commit();
 
-        mydatabase = openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
+
+        mydatabase = openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
         initDB();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         listView = (ListView) findViewById(R.id.drawerList);
         navi_list = getResources().getStringArray(R.array.navi_list);
 
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.on,R.string.on){
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.on, R.string.on) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 //Toast.makeText(getApplicationContext(),"Navi is On",Toast.LENGTH_SHORT).show();
@@ -94,8 +131,19 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         getSupportActionBar().setHomeButtonEnabled(true);
 
         upcCodes = new ArrayList<>();
-        mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE ,null);
+        mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE, null);
+        client = new GooglePlaces("AIzaSyCSUGPn5OAK26WX5x9IbnnNoajQL2tn44w");
 
+        System.out.println("Get location");
+
+        getLocation();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getLocation();
     }
 
     @Override
@@ -110,48 +158,42 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 //        if (navi_list[position].equalsIgnoreCase("Detail View")){
 //            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).addToBackStack("DetailFragment").commit();
 //        }
-        if(navi_list[position].equalsIgnoreCase("Shopping View")){
+        if (navi_list[position].equalsIgnoreCase("Shopping View")) {
             IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
             i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+            i.setCaptureLayout(R.layout.scanner_layout);
             i.initiateScan();
         }
-        if (navi_list[position].equalsIgnoreCase("History View")){
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).addToBackStack("HistoryFragment").commit();
+        if (navi_list[position].equalsIgnoreCase("History View")) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new HistoryFragment()).addToBackStack("HistoryFragment").commit();
         }
-        if (navi_list[position].equalsIgnoreCase("List View")){
+        if (navi_list[position].equalsIgnoreCase("List View")) {
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
         }
-        if(navi_list[position].equalsIgnoreCase("Checkout View")){
-            if(upcCodes != null){
-            bundle.putStringArrayList("upcCodes", upcCodes);
-            CheckoutFragment cof = new CheckoutFragment();
-            cof.setArguments(bundle);
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, cof).addToBackStack("CheckoutFragment").commit();}
-            else{
-                System.out.println("No ArrayList");
-            }
+        if (navi_list[position].equalsIgnoreCase("Checkout View")) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new CheckoutFragment()).addToBackStack("CheckoutFragment").commit();
         }
+
 
         drawerLayout.closeDrawer(findViewById(R.id.drawerList));
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)){
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        if (item.getItemId() == R.id.action_settings){
+        if (item.getItemId() == R.id.action_settings) {
             //Do things here
             //You can delete the print and toast message.
 
-            Toast.makeText(getApplicationContext(),"Search button pressed",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Search button pressed", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void initDB()
-    {
+    public void initDB() {
         mydatabase.execSQL("create table if not exists list (" +
                 "id INTEGER PRIMARY KEY   AUTOINCREMENT ," +
                 "barcode text," +
@@ -185,50 +227,48 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         b.show();
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent){
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
             final String result = scanResult.getContents(); //this is the UPC code of the item scanned.
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
-            if(result != null){
+            if (result != null) {
                 try {
                     JSONObject jsonResult = queryUPC(result);
                     String itemName;
                     boolean valid = jsonResult.getBoolean("valid"); //if true, then item is in UPC Database
                     System.out.println("First try valid = " + valid);
-                    if(!valid){
+                    if (!valid) {
                         //many products have an extra 0 in the upcAPI, lets try that....
-                        String zeroCode = "0"+result;
+                        String zeroCode = "0" + result;
                         JSONObject jsonZero = queryUPC(zeroCode);
                         valid = jsonZero.getBoolean("valid");
-                        System.out.println("Zero code valid = "+valid);
-                        if(!valid){
-                        //it really isn't in the UPC DB.. we need to ask for it!
+                        System.out.println("Zero code valid = " + valid);
+                        if (!valid) {
+                            //it really isn't in the UPC DB.. we need to ask for it!
                             addNotification(result);
-                        }
-                        else{
+                        } else {
                             itemName = jsonZero.getString("itemname");
                             Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                             processItem(itemName, zeroCode);
                         }
-                    }
-                    else {
+                    } else {
                         itemName = jsonResult.getString("itemname");
                         Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                         processItem(itemName, result);
                     }
-                }
-                catch(JSONException e) {
+                } catch (JSONException e) {
                     System.out.println(e);
                 }
 
             }
-        // else continue with any other code you need in the method
-        //...
-         }
+            // else continue with any other code you need in the method
+            //...
+        }
+        //refreshListView();
     }
 
-    public void processItem(String itemName, String upcCode){
+    public void processItem(String itemName, String upcCode) {
         final String item = itemName;
 
         Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0;", null);
@@ -236,7 +276,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
-           System.out.println("Count is zero, new item!");
+            System.out.println("Count is zero, new item!");
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("New Item Found");
 
@@ -271,30 +311,26 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         //getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
 
 
-
-
     }
 
     /**
-     *
      * @param barcode
      * @return JSON Object
      * @throws JSONException
      */
-    public JSONObject queryUPC(String barcode) throws JSONException
-    {
+    public JSONObject queryUPC(String barcode) throws JSONException {
         JSONObject json;
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
-        String K="";
+        String K = "";
         try {
-            URL url = new URL("http://api.upcdatabase.org/json/72b665bccfa4c65025f18e2be5bd2e65/"+barcode);
+            URL url = new URL("http://api.upcdatabase.org/json/72b665bccfa4c65025f18e2be5bd2e65/" + barcode);
             InputStream is = url.openStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             String line;
-            while ( (line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 K += line;
             }
             br.close();
@@ -308,7 +344,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         return json;
     }
 
-    public void refreshListView(){
+    public void refreshListView() {
         Fragment currentFragement = getSupportFragmentManager().findFragmentByTag("listTag");
         android.support.v4.app.FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction().addToBackStack("ListRefresh");
         fragTrans.detach(currentFragement);
@@ -319,13 +355,18 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     private Detail_Data detail_data;
-    public void setDetail(Detail_Data x){
+
+    public void setDetail(Detail_Data x) {
         detail_data = x;
     }
-    public Detail_Data getDetail_data(){
+
+    public Detail_Data getDetail_data() {
         return detail_data;
     }
-    public SQLiteDatabase getDatabase(){return mydatabase;}
+
+    public SQLiteDatabase getDatabase() {
+        return mydatabase;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -334,9 +375,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.menu_main, menu);
             return super.onCreateOptionsMenu(menu);
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -356,14 +395,121 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     public void onBackPressed() {
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        if (fm.getBackStackEntryCount() >0){
+        if (fm.getBackStackEntryCount() > 0) {
             fm.popBackStack();
-           // getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, fm.popBackStack()).addToBackStack("DetailFragment").commit();
+            // getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, fm.popBackStack()).addToBackStack("DetailFragment").commit();
             System.out.println("POP UP");
 
 
-        }else{
+        } else {
             super.onBackPressed();
         }
     }
+
+    public Location getLocation() {
+        Location theLocation = null;
+        try {
+            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE); //Android Location manager
+
+            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER); //check to see if GPS is Enabled
+            networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER); //check to see if Network is Enabled
+
+            if (!gpsEnabled && !networkEnabled) {
+                //can't get GPS Location, we should handle this.
+            } else {
+                canGetLocation = true;
+                System.out.println("We can get the location...");
+                int locationCheck = ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION);
+                if (locationCheck != PackageManager.PERMISSION_GRANTED) {
+                    //no location permission, need to ask user for this
+
+                }
+                if (networkEnabled) {
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    System.out.println("network");
+                    theLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    if (theLocation != null) {
+                        lat = theLocation.getLatitude();
+                        lon = theLocation.getLongitude();
+                        String out = "Lat: " + theLocation.getLatitude() + " Long: " + theLocation.getLongitude();
+                        System.out.println(out);
+                    }
+
+                }
+                if (gpsEnabled) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    System.out.println("Gps");
+                    theLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (theLocation != null) {
+                        lat = theLocation.getLatitude();
+                        lon = theLocation.getLongitude();
+                        String out = "Lat: " + theLocation.getLatitude() + " Long: " + theLocation.getLongitude();
+                        System.out.println(out);
+                    }
+                }
+                new AsyncTask<Void, Void, Void>(){
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        System.out.println(lat);
+                        System.out.println(lon);
+                        List<Place> places = client.getNearbyPlaces(lon, lat, 25, 5);
+                        int count = places.size();
+                        for(int i = 0; i < count; i++) {
+                            currentPlace = places.get(i);
+
+                            List <String> types = currentPlace.getTypes();
+                            int typeCount = types.size();
+                            for(int j = 0; j < typeCount; j++) {
+                                if(types.get(j).equalsIgnoreCase("store")){
+                                    System.out.println("We at a store!");
+                                    startInStore = true;
+                                }
+                            }
+                            determineStartingView();
+                        }
+                        return null;
+                    }
+                }.execute();
+                //System.out.println("Name: "+currentPlace.getName());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return theLocation;
+    }
+
+    public void determineStartingView(){
+        if(startInStore){
+            IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
+            i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+            i.setCaptureLayout(R.layout.scanner_layout);
+            i.initiateScan();
+        }
+        else{
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        getLocation();
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+
 }
+
+

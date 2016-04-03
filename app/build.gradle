@@ -28,11 +28,14 @@ repositories {
     maven{
         url 'com.google.zxing'
     }
+    maven{
+        url 'se.walkercrou'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    testCompile 'junit:junit:4.11'
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:design:23.2.0'
 
@@ -46,4 +49,6 @@ dependencies {
 
     compile 'org.jsoup:jsoup:1.8.3'
     compile 'com.google.zxing:core:3.2.1'
+    compile 'se.walkercrou:google-places-api-java:2.1.2'
+    compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
 }

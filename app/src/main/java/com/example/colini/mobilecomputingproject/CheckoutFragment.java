@@ -46,16 +46,15 @@ public class CheckoutFragment extends Fragment {
         barcodeImage = (ImageView) myView.findViewById(R.id.barcode_image);
         upcCode = (TextView) myView.findViewById(R.id.upc_code);
         product = (TextView) myView.findViewById(R.id.item_description);
-        barcodes = getArguments().getStringArrayList("upcCodes"); //here we get the ArrayList from the MainActivity, instead we should grab from db...
-        final int barcodesSize = barcodes.size();
         myObject = new JSONObject();
-        if(barcodes.isEmpty()){
-            upcCode.setText("No Products Scanned");
-        }
-        else{
-            String code = barcodes.get(0);
-            changeUPC(code);
-        }
+
+        /*
+        Need to get items for DB which have been scanned.
+        Add them into a structure with the number of items
+        Then use this structure to loop through
+         */
+
+
 
         final GestureDetector gesture = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener(){
             @Override
@@ -78,15 +77,7 @@ public class CheckoutFragment extends Fragment {
                         a left swipe.
 
                          */
-                        if(currPos == 0){ //if we are showing the first element in barcodes
-                            currPos = barcodesSize - 1; //set the position to the last element of barcodes
-                        }
-                        else{
-                            currPos--; //else decrease the current position.
-                        }
-                        if(!barcodes.isEmpty()) {
-                            changeUPC(barcodes.get(currPos)); //update!
-                        }
+
                     } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {//swipe right
                                                 /*
                         If the difference between the x values of the final position and initial position
@@ -95,15 +86,6 @@ public class CheckoutFragment extends Fragment {
 
                          */
 
-                        if(currPos == barcodesSize - 1){ //if we're displaying the last element
-                            currPos = 0; //set to the first
-                        }
-                        else{
-                            currPos++; //else show the next element
-                        }
-                        if(!barcodes.isEmpty()) {
-                            changeUPC(barcodes.get(currPos)); //update!
-                        }
                     }
                 } catch (Exception e) {
                     System.out.println(e); //hope not!
@@ -118,8 +100,7 @@ public class CheckoutFragment extends Fragment {
                 return gesture.onTouchEvent(event);
             }
         });
-        upcCode.setText(getArguments().getString("itemname"));
-        product.setText(getArguments().getString("valid"));
+
         return myView;
     }
 
