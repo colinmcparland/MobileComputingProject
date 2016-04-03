@@ -51,14 +51,14 @@ public class CheckoutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
         myCart = new ArrayList<Product>();
-        Cursor c =  myDb.rawQuery("select distinct(barcode), product_name, count(barcode) as quant from list where scanned = 1 group by barcode",null);
+        Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant from list where scanned = 1 group by barcode",null);
         try {
             while (c.moveToNext()) {
                 if(myCart == null){
-                    myCart.set(0, new Product(c.getString(0), c.getString(1), c.getInt(2)));
+                    myCart.set(0, new Product(c.getString(0), "Test title", c.getInt(2)));
                 }
                 else{
-                    myCart.add(new Product(c.getString(0), c.getString(1), c.getInt(2)));
+                    myCart.add(new Product(c.getString(0), "Test title", c.getInt(2)));
                 }
             }
         }
@@ -78,6 +78,8 @@ public class CheckoutFragment extends Fragment {
         final int maxProducts = myCart.size();
         if(maxProducts != 0){
             changeUPC(myCart.get(0));
+        }
+        else{
         }
 
 
@@ -131,6 +133,9 @@ public class CheckoutFragment extends Fragment {
                 } catch (Exception e) {
                     System.out.println(e); //hope not!
                 }
+                int pos = currPos + 1;
+                String progress = pos + " / " +maxProducts;
+                numProducts.setText(progress);
                 return super.onFling(e1, e2, velocityX, velocityY);
             }
         });
@@ -150,11 +155,9 @@ public class CheckoutFragment extends Fragment {
         int quant = p.quantity;
         String title = p.itemTitle;
         String quantity_text = "Number of Products: " + quant;
-        int height = barcodeImage.getHeight();
-        int width = barcodeImage.getWidth();
         quantity.setText(quantity_text);
         upcCode.setText(code);
-        bitmapForBarcode = encodeBarcodeBitmap(code, width, height); //need to change BitMatrix to Bitmap
+        bitmapForBarcode = encodeBarcodeBitmap(code, 600, 300); //need to change BitMatrix to Bitmap
         barcodeImage.setImageBitmap(bitmapForBarcode);
         product.setText(title);
     }
@@ -221,6 +224,7 @@ public class CheckoutFragment extends Fragment {
         return json;
     }
 
+
     protected class Product{
         String barcode;
         String itemTitle;
@@ -229,6 +233,13 @@ public class CheckoutFragment extends Fragment {
             barcode = code;
             itemTitle = title;
             quantity = quant;
+        }
+
+        @Override
+        public String toString() {
+            String text = "Title: " + itemTitle + " Barcode: " + barcode + " Quant: " + quantity;
+
+            return text;
         }
     }
 }
