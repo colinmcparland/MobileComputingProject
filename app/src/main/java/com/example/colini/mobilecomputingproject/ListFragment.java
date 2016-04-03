@@ -56,6 +56,7 @@ public class ListFragment extends Fragment {
         if (cursor.getCount()==0)
         {
             TextView empty = new TextView(getActivity());
+            empty.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             empty.setText("The list is empty!");
             LL.addView(empty);
         }

@@ -137,8 +137,7 @@ public class searchFragment extends Fragment implements View.OnFocusChangeListen
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-
+            //e.printStackTrace();
 
             //  TO DO  >>  Implement the history table;
             //  check if the product exists in the cache (HISTORY) first
@@ -250,8 +249,7 @@ public class searchFragment extends Fragment implements View.OnFocusChangeListen
                 new Button.OnClickListener(){
                     public void onClick(View v)
                     {
-                        mydatabase.execSQL("insert into list (product_name, barcode, scanned) values('"+productName+"','"+barcode+"',0)");
-                        //List.add(currentList.get(ii));
+                        mydatabase.execSQL("insert into list (product_name, barcode, scanned) values(\""+productName+"\",'"+barcode+"',0)");
                         Snackbar.make(v, productName+" has been added!", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
