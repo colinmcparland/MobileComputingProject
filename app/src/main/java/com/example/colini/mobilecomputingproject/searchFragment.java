@@ -250,7 +250,6 @@ public class searchFragment extends Fragment implements View.OnFocusChangeListen
                     public void onClick(View v)
                     {
                         mydatabase.execSQL("insert into list (product_name, barcode, scanned) values(\""+productName+"\",'"+barcode+"',0)");
-                        //List.add(currentList.get(ii));
                         Snackbar.make(v, productName+" has been added!", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }

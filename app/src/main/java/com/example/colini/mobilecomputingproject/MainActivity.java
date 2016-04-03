@@ -194,6 +194,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             public void onClick(DialogInterface dialog, int whichButton) {
                 Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
                 mydatabase.execSQL("insert into list (product_name,barcode, scanned) values('" + edt.getText() + "','" + barcode + "',1)");
+                getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -228,11 +229,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         }
                         else{
                             itemName = jsonZero.getString("itemname");
+                            Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                             processItem(itemName, zeroCode);
                         }
                     }
                     else {
                         itemName = jsonResult.getString("itemname");
+                        Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                         processItem(itemName, result);
                     }
                 }
@@ -246,9 +249,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
     }
 
-    public void processItem(String itemName, String upcCode){
+    public void processItem(String itemName, final String upcCode){
         final String item = itemName;
-        final String code = upcCode;
+
         Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0;", null);
         System.out.println("Processing item... " + itemName + " " + upcCode);
         if (c.getCount() == 0) {
@@ -263,8 +266,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    mydatabase.execSQL("insert into list (product_name, scanned, barcode) values('" + item + "',1, '"+ code +"')");
+                    mydatabase.execSQL("insert into list (product_name, barcode, scanned) values('" + item + "','"+upcCode+"',1)");
                     Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
+
                 }
             });
 
@@ -277,10 +282,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             });
             AlertDialog msg = builder.create();
             msg.show();
+            Toast.makeText(getApplicationContext(), "Need to add to database", Toast.LENGTH_LONG).show();
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
             Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
+
+
         }
         //after this we should also refresh the list view...
         //getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
@@ -400,7 +409,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 //start at list view?
             }
             else {
-
                 if (networkEnabled) { //first check for location via network
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                     if (locationManager != null){
