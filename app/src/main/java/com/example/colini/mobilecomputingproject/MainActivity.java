@@ -13,6 +13,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -69,6 +70,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     double lat;
     double lon;
 
+    boolean closedFromScan;
 
 
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
@@ -133,6 +135,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
             IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
             i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+            i.addExtra("closedFromScan", true);
             i.setCaptureLayout(R.layout.scanner_layout);
             i.initiateScan();
         }
@@ -212,41 +215,39 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if (scanResult != null) {
             final String result = scanResult.getContents(); //this is the UPC code of the item scanned.
             upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
-            if(result != null){
+            if (result != null) {
                 try {
                     JSONObject jsonResult = queryUPC(result);
                     String itemName;
                     boolean valid = jsonResult.getBoolean("valid"); //if true, then item is in UPC Database
                     System.out.println("First try valid = " + valid);
-                    if(!valid){
+                    if (!valid) {
                         //many products have an extra 0 in the upcAPI, lets try that....
-                        String zeroCode = "0"+result;
+                        String zeroCode = "0" + result;
                         JSONObject jsonZero = queryUPC(zeroCode);
                         valid = jsonZero.getBoolean("valid");
-                        System.out.println("Zero code valid = "+valid);
-                        if(!valid){
+                        System.out.println("Zero code valid = " + valid);
+                        if (!valid) {
                             //it really isn't in the UPC DB.. we need to ask for it!
                             addNotification(result);
-                        }
-                        else{
+                        } else {
                             itemName = jsonZero.getString("itemname");
                             Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                             processItem(itemName, zeroCode);
                         }
-                    }
-                    else {
+                    } else {
                         itemName = jsonResult.getString("itemname");
                         Toast.makeText(getApplicationContext(), itemName, Toast.LENGTH_LONG).show();
                         processItem(itemName, result);
                     }
-                }
-                catch(JSONException e) {
+                } catch (JSONException e) {
                     System.out.println(e);
                 }
 
             }
             // else continue with any other code you need in the method
             //...
+            closedFromScan = true;
         }
     }
 
@@ -411,7 +412,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             }
             else {
                 if (networkEnabled) { //first check for location via network
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.myLooper());
                     if (locationManager != null){
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         if(myLocation != null) {
@@ -421,7 +422,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     }
                 }
                 if(gpsEnabled){ //then check with GPS
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, Looper.myLooper());
                     if(locationManager != null){
                         myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         if(myLocation != null) {
@@ -451,7 +452,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                                 System.out.println(out2);
                                 if (temp.equalsIgnoreCase("store")) {
                                     isInStore = true;
-                                    determineInitialView();
+
                                     return null;
                                 }
                             }
@@ -466,7 +467,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         super.onPostExecute(aVoid);
                     }
                 }.execute();
-
             }
         }
         catch(Exception e){
@@ -481,6 +481,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
             i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
             i.setCaptureLayout(R.layout.scanner_layout);
+            i.addExtra("closedFromScan", true);
             i.initiateScan();
         }
         else{
@@ -512,5 +513,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     public void onProviderEnabled(String provider) {
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!closedFromScan) {
+            getLocation();
+            closedFromScan = true;
+        }
     }
 }
