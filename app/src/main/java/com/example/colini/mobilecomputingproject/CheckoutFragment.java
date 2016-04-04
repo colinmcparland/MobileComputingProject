@@ -54,11 +54,14 @@ public class CheckoutFragment extends Fragment {
         Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant from list where scanned = 1 group by barcode",null);
         try {
             while (c.moveToNext()) {
+                String barcode = c.getString(0);
+                Cursor c2 = myDb.rawQuery("select distinct(product_name) where barcode = '"+barcode+"'", null);
+                c2.moveToNext();
                 if(myCart == null){
-                    myCart.set(0, new Product(c.getString(0), "Test title", c.getInt(1)));
+                    myCart.set(0, new Product(c.getString(0), c2.getString(0), c.getInt(1)));
                 }
                 else{
-                    myCart.add(new Product(c.getString(0), "Test title", c.getInt(1)));
+                    myCart.add(new Product(c.getString(0), c2.getString(0), c.getInt(1)));
                 }
             }
         }
