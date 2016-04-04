@@ -70,7 +70,14 @@ public class View_Detial extends Fragment {
         // prepare the string to print
         String temp = "<b>Barcode Number</b><br>" + barcode +
                 "<br><br><b>Name</b><br>" + cursor.getString(2) +
-                "<br><br><b>Description</b><br>" + desc;
+                "<br><br><b>Description</b><br>";
+
+        // if there is a description, then display it
+        // otherwise display a 'no description available' alert
+        if(desc.compareTo("") == 0)
+            temp += "There is no description available";
+        else
+            temp += desc;
 
         // print the information depending on what is in the database
         if(cursor.getCount() != 0)
