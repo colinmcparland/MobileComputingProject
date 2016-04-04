@@ -61,7 +61,7 @@ public class View_Detial extends Fragment {
             JSONObject json = queryUPC(barcode);
             desc = json.getString("description");
         } catch (JSONException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
         // center the text
@@ -126,7 +126,35 @@ public class View_Detial extends Fragment {
             br.close();
             is.close();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            Cursor c = mydatabase.rawQuery("select * from history where barcode = '"+barcode+"'", null);
+            if (c.getCount()>0)
+            {
+                K="{" +
+                        "\"valid\":\"true\"," +
+                        "\"number\":\""+barcode+"\"," +
+                        "\"itemname\":\""+c.getString(2)+"\"," +
+                        "\"alias\":\"\"," +
+                        "\"description\":\"\"," +
+                        "\"avg_price\":\"\"," +
+                        "\"rate_up\":0," +
+                        "\"rate_down\":0" +
+                        "}";
+            }
+            else
+            {
+                K="{" +
+                        "\"valid\":\"true\"," +
+                        "\"number\":\""+barcode+"\"," +
+                        "\"itemname\":\"NA\"," +
+                        "\"alias\":\"\"," +
+                        "\"description\":\"\"," +
+                        "\"avg_price\":\"\"," +
+                        "\"rate_up\":0," +
+                        "\"rate_down\":0" +
+                        "}";
+            }
+
         }
         json = new JSONObject(K);
         return json;

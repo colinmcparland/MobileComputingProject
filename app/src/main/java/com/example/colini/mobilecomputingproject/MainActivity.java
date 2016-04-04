@@ -168,7 +168,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             //Do things here
             //You can delete the print and toast message.
 
-            Toast.makeText(getApplicationContext(),"Search button pressed",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Search button pressed", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -181,6 +181,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 "barcode text," +
                 "product_name char(255)," +
                 "scanned int" +
+                ")");
+        mydatabase.execSQL("create table if not exists history (" +
+                "id INTEGER PRIMARY KEY   AUTOINCREMENT ," +
+                "barcode text," +
+                "product_name char(255)," +
+                "transaction_id text" +
+                ")");
+        mydatabase.execSQL("create table if not exists payment (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "store_name text," +
+                "time datetime" +
                 ")");
     }
 
@@ -327,8 +338,62 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             is.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+//            Cursor c = mydatabase.rawQuery("select * from history where barcode = '"+barcode+"'", null);
+//            if (c.getCount()==0)
+//            {
+//                c.moveToFirst();
+//                K="{" +
+//                        "\"valid\":\"true\"," +
+//                        "\"number\":\""+barcode+"\"," +
+//                        "\"itemname\":\""+c.getString(2)+"\"," +
+//                        "\"alias\":\"\"," +
+//                        "\"description\":\"\"," +
+//                        "\"avg_price\":\"\"," +
+//                        "\"rate_up\":0," +
+//                        "\"rate_down\":0" +
+//                        "}";
+//            }
+
         }
+
+        if (K.equals(""))
+        {
+            Cursor c = mydatabase.rawQuery("select * from history where barcode = '"+barcode+"'", null);
+            Cursor d = mydatabase.rawQuery("select * from list where  barcode = '"+barcode+"'",null);
+            if (c.getCount()>0)
+            {
+                c.moveToFirst();
+                K="{" +
+                        "\"valid\":\"true\"," +
+                        "\"number\":\""+barcode+"\"," +
+                        "\"itemname\":\""+c.getString(2)+"\"," +
+                        "\"alias\":\"\"," +
+                        "\"description\":\"\"," +
+                        "\"avg_price\":\"\"," +
+                        "\"rate_up\":0," +
+                        "\"rate_down\":0" +
+                        "}";
+            }
+            else
+            {
+               if (d.getCount()>0)
+               {
+                   d.moveToFirst();
+                   K="{" +
+                           "\"valid\":\"true\"," +
+                           "\"number\":\""+barcode+"\"," +
+                           "\"itemname\":\""+d.getString(2)+"\"," +
+                           "\"alias\":\"\"," +
+                           "\"description\":\"\"," +
+                           "\"avg_price\":\"\"," +
+                           "\"rate_up\":0," +
+                           "\"rate_down\":0" +
+                           "}";
+               }
+            }
+        }
+
 
         json = new JSONObject(K);
         return json;

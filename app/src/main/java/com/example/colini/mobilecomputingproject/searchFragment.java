@@ -143,25 +143,9 @@ public class searchFragment extends Fragment implements View.OnFocusChangeListen
             //  check if the product exists in the cache (HISTORY) first
             //
 
-            /*
-            Cursor c = mydatabase.rawQuery("select * from history where product_name='"+query+"' or barcode='"+query+"'" ,null);
-            if (c.getCount()>0)
-            {
 
-                do {
-                    currentList.add(c.getString(1));
-                    currentBarcodes.add(c.getString(2));
-                    ImageView tempButton = new ImageView(getActivity());
-                    tempButton.setImageResource(R.drawable.add);
-                    //tempButton.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
-                    results.add(c.getString(1));
-                    addButtons.add(tempButton);
 
-                }while(c.moveToNext());
-                return results;
-            }
 
-            */
         }
         return results;
     }
