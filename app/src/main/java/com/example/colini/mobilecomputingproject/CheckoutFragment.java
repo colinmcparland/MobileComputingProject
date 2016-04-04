@@ -7,12 +7,14 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -69,6 +71,9 @@ public class CheckoutFragment extends Fragment {
             c.close();
         }
 
+
+
+
         myView = inflater.inflate(R.layout.checkoutview_layout, container, false);
         barcodeImage = (ImageView) myView.findViewById(R.id.barcode_image);
         upcCode = (TextView) myView.findViewById(R.id.upc_code);
@@ -77,6 +82,38 @@ public class CheckoutFragment extends Fragment {
         numProducts = (TextView) myView.findViewById(R.id.numProducts);
 
         myObject = new JSONObject();
+
+
+
+        Button finish=(Button) myView.findViewById(R.id.buttonFinish);
+        finish.setOnClickListener(
+                new Button.OnClickListener() {
+                    public void onClick(View v) {
+
+                        myDb.execSQL("insert into payment (store_name, time) values (\""+""+"\",date('now'))");
+                        Cursor payment=myDb.rawQuery("select * from payment order by id desc limit 1", null);
+                        payment.moveToFirst();
+                        Cursor c= myDb.rawQuery("select * from list where scanned =1",null);
+                        if (c.getCount()>0)
+                        {
+                            c.moveToFirst();
+                            do {
+                                myDb.execSQL("insert into history (barcode, product_name,transaction_id) " +
+                                        "values (" +
+                                        "\""+c.getString(1)+"\"," +
+                                        "\""+c.getString(2)+"\"," +
+                                        "\""+payment.getString(0)+"\"" +
+                                        ")");
+                                myDb.execSQL("delete from list where id='"+c.getString(0)+"'");
+                                getFragmentManager().beginTransaction().replace(R.id.mainContainer, new HistoryFragment()).addToBackStack("HistoryFragment").commit();
+                                Snackbar.make(v, "Checked Out Successfully !", Snackbar.LENGTH_LONG)
+                                        .setAction("Action", null).show();
+                            }while (c.moveToNext());
+                        }
+
+                    }
+                }
+        );
 
         final int maxProducts = myCart.size();
         if(maxProducts != 0){

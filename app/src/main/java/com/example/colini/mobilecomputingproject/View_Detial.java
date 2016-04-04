@@ -61,7 +61,7 @@ public class View_Detial extends Fragment {
             JSONObject json = queryUPC(barcode);
             desc = json.getString("description");
         } catch (JSONException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
         // center the text
@@ -70,7 +70,14 @@ public class View_Detial extends Fragment {
         // prepare the string to print
         String temp = "<b>Barcode Number</b><br>" + barcode +
                 "<br><br><b>Name</b><br>" + cursor.getString(2) +
-                "<br><br><b>Description</b><br>" + desc;
+                "<br><br><b>Description</b><br>";
+
+        // if there is a description, then display it
+        // otherwise display a 'no description available' alert
+        if(desc.compareTo("") == 0)
+            temp += "There is no description available";
+        else
+            temp += desc;
 
         // print the information depending on what is in the database
         if(cursor.getCount() != 0)
@@ -119,7 +126,35 @@ public class View_Detial extends Fragment {
             br.close();
             is.close();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            Cursor c = mydatabase.rawQuery("select * from history where barcode = '"+barcode+"'", null);
+            if (c.getCount()>0)
+            {
+                K="{" +
+                        "\"valid\":\"true\"," +
+                        "\"number\":\""+barcode+"\"," +
+                        "\"itemname\":\""+c.getString(2)+"\"," +
+                        "\"alias\":\"\"," +
+                        "\"description\":\"\"," +
+                        "\"avg_price\":\"\"," +
+                        "\"rate_up\":0," +
+                        "\"rate_down\":0" +
+                        "}";
+            }
+            else
+            {
+                K="{" +
+                        "\"valid\":\"true\"," +
+                        "\"number\":\""+barcode+"\"," +
+                        "\"itemname\":\"NA\"," +
+                        "\"alias\":\"\"," +
+                        "\"description\":\"\"," +
+                        "\"avg_price\":\"\"," +
+                        "\"rate_up\":0," +
+                        "\"rate_down\":0" +
+                        "}";
+            }
+
         }
         json = new JSONObject(K);
         return json;

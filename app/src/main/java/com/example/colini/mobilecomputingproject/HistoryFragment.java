@@ -26,38 +26,43 @@ public class HistoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.content_history,container,false);
+        rootView = inflater.inflate(R.layout.content_history, container, false);
 
-        mydatabase = getActivity().openOrCreateDatabase("scanAdnShop", Context.MODE_PRIVATE, null);
+        mydatabase = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
 
         LinearLayout LL = (LinearLayout) rootView.findViewById(R.id.mainContainer);
 
         initDB();
 
-        Cursor dbElements = mydatabase.rawQuery("select * from history", null);
-        if (dbElements.getCount()==0)
+        //mydatabase.execSQL("drop table history");
+
+
+        Cursor transactions = mydatabase.rawQuery("select * from payment",null);
+        if (transactions.getCount()==0)
         {
-            LL.addView(creatRow("You haven't purchased any item yet!",""));
-            //return;
+            LL.addView(creatRow("\tYou haven't purchased any item yet!",""));
+            return rootView;
         }
+        transactions.moveToFirst();
+        do {
+            Cursor dbElements = mydatabase.rawQuery("select * from history where transaction_id='"+transactions.getString(0)+"'", null);
+            dbElements.moveToFirst();
+            if (dbElements.getCount()==0) continue;
+
+            LinearLayout hdr=createHeader(""+transactions.getString(0), transactions.getString(1), transactions.getString(2), "");
+            LL.addView(hdr);
+            do {
+                LinearLayout row = creatRow(dbElements.getString(2), "");
+                LL.addView(row);
+            }while(dbElements.moveToNext());
+
+        }while(transactions.moveToNext());
 
 
 
-        LinearLayout hdr=createHeader("1", "SuperStore Halifax", "2016-02-02 03:21", "$28.2");
-        LL.addView(hdr);
 
-        for (int i=0; i<7; i++) {
-            LinearLayout row = creatRow("Toilet Paper", "$10");
-            LL.addView(row);
-        }
 
-        LinearLayout hdr2=createHeader("2", "SuperStore Halifax", "2016-02-02 03:21", "$28.2");
-        LL.addView(hdr2);
 
-        for (int i=0; i<7; i++) {
-            LinearLayout row = creatRow("Toilet Paper", "$10");
-            LL.addView(row);
-        }
 
 
 
