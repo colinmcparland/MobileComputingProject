@@ -84,7 +84,13 @@ public class CheckoutFragment extends Fragment {
 
 
 
+
         Button finish=(Button) myView.findViewById(R.id.buttonFinish);
+        if (c.getCount()==0)
+        {
+            finish.setVisibility(View.INVISIBLE);
+        }
+
         finish.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {

@@ -18,7 +18,7 @@
         android:layout_height="match_parent"
         android:id="@+id/drawerList"
         android:layout_gravity="left"
-        android:background="#FF8800">
+        android:background="#ccdc95">
     </ListView>
 
 </android.support.v4.widget.DrawerLayout>

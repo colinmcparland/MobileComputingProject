@@ -1,6 +1,5 @@
 package com.example.colini.mobilecomputingproject;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,31 +55,38 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private ListView listView;
     private String[] navi_list;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private int shortToast_time = 500;
+    private Bundle bundle;
+    private int codesLength = 0;
+    private ArrayList <String> upcCodes;
     SQLiteDatabase mydatabase;
     public static String currentView="";
 
-    public String locationName; //to hold location name if we can get, used for the history
-    boolean isInStore; //flag to see if we are in store. used to determine initial fragment
-    boolean gpsEnabled; //flag to see if the GPS is enabled.
-    boolean networkEnabled; //flag to see if network provider is enabled
-    Location myLocation; //the users current location
-    LocationManager locationManager; //location manager - used to resolve location
+    boolean isInStore;
+    boolean gpsEnabled;
+    boolean networkEnabled;
+    Location myLocation;
+    LocationManager locationManager;
     double lat;
     double lon;
 
-    boolean closedFromScan; /*flag to see if the camera has been closed. when the camera is closed
-    it restarts the main activity. We don't want a loop to continue opening the camera based on location.
-    */
-    GooglePlaces client; //Used for the Google Places API
+    boolean closedFromScan;
+
+
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+
+    GooglePlaces client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new SplashFragment()).addToBackStack("HistoryFragment").commit(); //show this screen while we get the location.
-        client = new GooglePlaces("AIzaSyCSUGPn5OAK26WX5x9IbnnNoajQL2tn44w"); //create new Google Places client with specified API Key
-        getLocation(); // try and get the users location.
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new SplashFragment()).addToBackStack("HistoryFragment").commit();
+        client = new GooglePlaces("AIzaSyCSUGPn5OAK26WX5x9IbnnNoajQL2tn44w");
+        getLocation();
 
 
         mydatabase = openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
@@ -109,6 +115,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        upcCodes = new ArrayList<>();
         mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE ,null);
 
     }
@@ -126,7 +133,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 //            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).addToBackStack("DetailFragment").commit();
 //        }
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
-            launchScanner();
+            IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
+            i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+            i.addExtra("closedFromScan", true);
+            i.setCaptureLayout(R.layout.scanner_layout);
+            i.initiateScan();
         }
         if (navi_list[position].equalsIgnoreCase("History View")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).addToBackStack("HistoryFragment").commit();
@@ -210,15 +221,17 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         b.show();
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent){ //called when camera is closed or a scan is completed
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent); //parse the result - from ZXing
-        if (scanResult != null) { //make sure we have a result!
+    public void onActivityResult(int requestCode, int resultCode, Intent intent){
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanResult != null) {
             final String result = scanResult.getContents(); //this is the UPC code of the item scanned.
-            if (result != null) { //as long as the result is not null
+            upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
+            if (result != null) {
                 try {
-                    JSONObject jsonResult = queryUPC(result); //check the upc database
+                    JSONObject jsonResult = queryUPC(result);
                     String itemName;
                     boolean valid = jsonResult.getBoolean("valid"); //if true, then item is in UPC Database
+                    System.out.println("First try valid = " + valid);
                     if (!valid) {
                         //many products have an extra 0 in the upcAPI, lets try that....
                         String zeroCode = "0" + result;
@@ -251,10 +264,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void processItem(String itemName, final String upcCode){
         final String item = itemName;
-        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0;", null); //get everything on the list
-        if (c.getCount() == 0) { //item is not on the list.
+
+        Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0;", null);
+        System.out.println("Processing item... " + itemName + " " + upcCode);
+        if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
+            System.out.println("Count is zero, new item!");
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("New Item Found");
 
@@ -265,7 +281,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 public void onClick(DialogInterface dialog, int which) {
                     mydatabase.execSQL("insert into list (product_name, barcode, scanned) values('" + item + "','"+upcCode+"',1)");
                     Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit(); //refresh the list
+                    getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
 
                 }
             });
@@ -279,12 +295,21 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             });
             AlertDialog msg = builder.create();
             msg.show();
+            Toast.makeText(getApplicationContext(), "Need to add to database", Toast.LENGTH_LONG).show();
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
+            Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
 
+
         }
+        //after this we should also refresh the list view...
+        //getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
+
+
+
+
     }
 
     /**
@@ -426,9 +451,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void getLocation(){
         try{
-            locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE); //get the location manager
-            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER); //check to see if GPS Provider is enabled
-            networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER); //check to see if the Network Provider is enabled
+            locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
             int checkPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
             if(checkPermission != PackageManager.PERMISSION_GRANTED){
@@ -439,17 +464,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             if(!networkEnabled && !gpsEnabled){
                 //cannot get location view network or gps..
                 //need to handle
-                //will go to the list view.
-                locationName = null;
-                determineInitialView();
+                //start at list view?
             }
             else {
                 if (networkEnabled) { //first check for location via network
-                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null); //get a single update
+                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.myLooper());
                     if (locationManager != null) {
-                        myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER); //check the last known location.
+                        myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         if (myLocation != null) {
-                            lat = myLocation.getLatitude(); //set lat and lon
+                            lat = myLocation.getLatitude();
                             lon = myLocation.getLongitude();
                         }
                     }
@@ -464,8 +487,43 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         }
                     }
                 }
-                getGooglePlacesResult(); //get the Place from Google...
-                locationManager.removeUpdates(this); //stop updates to save battery!
+                String out = "Lat: " + lat + " Long: " + lon;
+                System.out.println(out);
+
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        List<Place> places = client.getNearbyPlaces(lat, lon, 25);
+                        int placesCount = places.size();
+                        for (int i = 0; i < placesCount; i++) {
+                            Place currentPlace = places.get(i);
+                            List<String> types = currentPlace.getTypes();
+                            int typeCount = types.size();
+                            System.out.println(typeCount);
+                            String out = "Name: " + currentPlace.getName();
+                            System.out.println(out);
+                            for (int j = 0; j < typeCount; j++) {
+                                String temp = types.get(j);
+                                String out2 = "Type: " + temp;
+                                System.out.println(out2);
+                                if (temp.equalsIgnoreCase("store")) {
+                                    isInStore = true;
+
+                                    return null;
+                                }
+                            }
+                        }
+                        isInStore = false;
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        determineInitialView();
+                        super.onPostExecute(aVoid);
+                    }
+                }.execute();
+                locationManager.removeUpdates(this);
 
             }
 
@@ -475,45 +533,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
     }
 
-    public void getGooglePlacesResult(){
-
-        new AsyncTask<Void, Void, Void>() { //needs to run in the background!
-            @Override
-            protected Void doInBackground(Void... params) {
-                List<Place> places = client.getNearbyPlaces(lat, lon, 25); //get the places within 25 meters of the current location
-                int placesCount = places.size();
-                for (int i = 0; i < placesCount; i++) { //for each place found
-                    Place currentPlace = places.get(i);
-                    String name = currentPlace.getName(); //get the name
-                    List<String> types = currentPlace.getTypes(); //get the Types of the place
-                    int typeCount = types.size();
-                    for (int j = 0; j < typeCount; j++) { //for each type
-                        String temp = types.get(j); //get the type
-                        if (temp.equalsIgnoreCase("store") || temp.contains("store")) { //if the type is a store
-                            isInStore = true; //set flag to true
-                            locationName = name; //set name of current location.
-                            return null; //return
-                        }
-                    }
-                }
-                isInStore = false; //if we get here we're not in a store!
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) { //called when the AsyncTask ends
-                determineInitialView();
-                super.onPostExecute(aVoid);
-            }
-        }.execute();
-
-    }
-
     public void determineInitialView(){
         System.out.println(isInStore);
         if(isInStore){
             //shopping view
-            launchScanner();
+            IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
+            i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+            i.setCaptureLayout(R.layout.scanner_layout);
+            i.addExtra("closedFromScan", true);
+            i.initiateScan();
         }
         else{
             //list view
@@ -528,12 +556,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
          */
     @Override
     public void onLocationChanged(Location location) {
-        System.out.println("Location Changed");
-        myLocation = location;
-        lat = myLocation.getLatitude();
-        lon = myLocation.getLongitude();
 
-        getGooglePlacesResult();
     }
 
     @Override
@@ -562,18 +585,5 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
 
         }
-    }
-
-    public void launchScanner(){
-        int checkPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA); //check camera permission
-        if(checkPermission != PackageManager.PERMISSION_GRANTED){ //if not granted
-            //ask for user's permission
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 2);
-        }
-        IntentIntegrator i = new IntentIntegrator(this); //from ZXing, launches an Intent
-        i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES); //only look for product codes
-        i.addExtra("closedFromScan", true); //set flag when we get the result
-        i.setCaptureLayout(R.layout.scanner_layout); //use a custom layout. This layout adds a cancel button.
-        i.initiateScan(); //start the scanner
     }
 }
