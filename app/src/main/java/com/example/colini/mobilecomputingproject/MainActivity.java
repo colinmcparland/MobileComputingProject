@@ -219,7 +219,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
             final String result = scanResult.getContents(); //this is the UPC code of the item scanned.
-            upcCodes.add(result); //it's added to an ArrayList, instead we should add it to a database
             if (result != null) {
                 try {
                     JSONObject jsonResult = queryUPC(result);
@@ -544,6 +543,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 int placesCount = places.size();
                 for (int i = 0; i < placesCount; i++) { //for each place
                     Place currentPlace = places.get(i);
+                    String name = currentPlace.getName();
                     List<String> types = currentPlace.getTypes(); //get the types of the place, there may be multiple
                     int typeCount = types.size();
                     for (int j = 0; j < typeCount; j++) { //for each type
