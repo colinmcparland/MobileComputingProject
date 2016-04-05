@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * Created by JoeyFarrell on 2016-03-20.
  */
 public class CheckoutFragment extends Fragment {
-
+    //fooo
     ImageView barcodeImage;
     TextView upcCode;
     TextView product;
@@ -57,13 +57,15 @@ public class CheckoutFragment extends Fragment {
         try {
             while (c.moveToNext()) {
                 String barcode = c.getString(0);
-                Cursor c2 = myDb.rawQuery("select distinct(product_name) where barcode = '"+barcode+"'", null);
+                int quant = c.getInt(1);
+                Cursor c2 = myDb.rawQuery("select distinct(product_name) where barcode = '"+barcode+"' group by product_name", null);
                 c2.moveToNext();
+                String name = c2.getString(0);
                 if(myCart == null){
-                    myCart.set(0, new Product(c.getString(0), c2.getString(0), c.getInt(1)));
+                    myCart.set(0, new Product(barcode, "Test Title", quant));
                 }
                 else{
-                    myCart.add(new Product(c.getString(0), c2.getString(0), c.getInt(1)));
+                    myCart.add(new Product(barcode, "Test Title", quant));
                 }
             }
         }
