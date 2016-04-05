@@ -135,7 +135,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         if(navi_list[position].equalsIgnoreCase("Checkout View")){
             Bundle b = new Bundle();
             b.putString("locationName", locationName);
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new CheckoutFragment()).addToBackStack("CheckoutFragment").commit();
+            if(locationName == null){
+                System.out.println("Location Name is null");
+            }
+            CheckoutFragment cof = new CheckoutFragment();
+            cof.setArguments(b);
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, cof).addToBackStack("CheckoutFragment").commit();
         }
 
 
@@ -549,7 +554,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     }
                 }
                 isInStore = false;
-                locationName = null;
+                locationName = "";
                 return null;
             }
 

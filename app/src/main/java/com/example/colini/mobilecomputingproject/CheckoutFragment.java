@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -50,6 +51,7 @@ public class CheckoutFragment extends Fragment {
     ArrayList <Product> myCart;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
+        final String storeName = getArguments().getString("locationName");
         myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
         myCart = new ArrayList<Product>();
         Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant, product_name from list where scanned = 1 group by barcode",null);
@@ -94,11 +96,8 @@ public class CheckoutFragment extends Fragment {
         finish.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
-                        String storeName = savedInstanceState.getString("locationName");
-                        if(storeName == null){
-                            //handle this, maybe ask the user for it?
-                        }
-                        myDb.execSQL("insert into payment (store_name, time) values (\""+""+"\",date('now'))");
+
+                        myDb.execSQL("insert into payment (store_name, time) values (\""+storeName+"\",date('now'))");
                         Cursor payment=myDb.rawQuery("select * from payment order by id desc limit 1", null);
                         payment.moveToFirst();
                         Cursor c= myDb.rawQuery("select * from list where scanned =1",null);
@@ -106,16 +105,18 @@ public class CheckoutFragment extends Fragment {
                         {
                             c.moveToFirst();
                             do {
+                                //Snackbar.make(v, "List has been successfully cleared!", Snackbar.LENGTH_LONG)
+                                  //      .setAction("Action", null).show();
+                                Toast.makeText(getActivity().getApplicationContext(),"Checked Out Successfully !", Toast.LENGTH_SHORT).show();
                                 myDb.execSQL("insert into history (barcode, product_name,transaction_id) " +
                                         "values (" +
                                         "\""+c.getString(1)+"\"," +
                                         "\""+c.getString(2)+"\"," +
                                         "\""+payment.getString(0)+"\"" +
                                         ")");
-                                myDb.execSQL("delete from list where id='"+c.getString(0)+"'");
+                                myDb.execSQL("delete from list where id='" + c.getString(0) + "'");
                                 getFragmentManager().beginTransaction().replace(R.id.mainContainer, new HistoryFragment()).addToBackStack("HistoryFragment").commit();
-                                Snackbar.make(v, "Checked Out Successfully !", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
+
                             }while (c.moveToNext());
                         }
 
