@@ -8,6 +8,7 @@ import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +40,10 @@ public class View_Detial extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.view_detail,container,false);
         button = (Button) rootView.findViewById(R.id.DetailButton);
+
+        // set the textview and add scrolling movement if the textview is really large
         textView = (TextView) rootView.findViewById(R.id.textView2);
+        textView.setMovementMethod(new ScrollingMovementMethod());
         button.setText("Delete");
 
         MainActivity myaty = (MainActivity) getActivity();
