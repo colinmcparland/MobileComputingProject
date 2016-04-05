@@ -55,13 +55,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private ListView listView;
     private String[] navi_list;
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    private int shortToast_time = 500;
-    private Bundle bundle;
-    private int codesLength = 0;
-    private ArrayList <String> upcCodes;
     SQLiteDatabase mydatabase;
     public static String currentView="";
 
+    String locationName;
     boolean isInStore;
     boolean gpsEnabled;
     boolean networkEnabled;
@@ -115,7 +112,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        upcCodes = new ArrayList<>();
+
         mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE ,null);
 
     }
@@ -133,11 +130,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 //            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).addToBackStack("DetailFragment").commit();
 //        }
         if(navi_list[position].equalsIgnoreCase("Shopping View")){
-            IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
-            i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
-            i.addExtra("closedFromScan", true);
-            i.setCaptureLayout(R.layout.scanner_layout);
-            i.initiateScan();
+            launchScanner();
         }
         if (navi_list[position].equalsIgnoreCase("History View")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).addToBackStack("HistoryFragment").commit();
@@ -207,14 +200,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         dialogBuilder.setMessage("The scanned item is not on our databases, do you want to add it?");
         dialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                Toast.makeText(MainActivity.this, "Added", Toast.LENGTH_LONG).show();
                 mydatabase.execSQL("insert into list (product_name,barcode, scanned) values('" + edt.getText() + "','" + barcode + "',1)");
                 getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                Toast.makeText(MainActivity.this, "Canceled", Toast.LENGTH_LONG).show();
+
             }
         });
         AlertDialog b = dialogBuilder.create();
@@ -266,11 +258,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         final String item = itemName;
 
         Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0;", null);
-        System.out.println("Processing item... " + itemName + " " + upcCode);
         if (c.getCount() == 0) {
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
-            System.out.println("Count is zero, new item!");
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("New Item Found");
 
@@ -280,7 +270,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     mydatabase.execSQL("insert into list (product_name, barcode, scanned) values('" + item + "','"+upcCode+"',1)");
-                    Toast.makeText(getApplicationContext(), "Item added!", Toast.LENGTH_LONG).show();
                     getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
 
                 }
@@ -295,21 +284,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             });
             AlertDialog msg = builder.create();
             msg.show();
-            Toast.makeText(getApplicationContext(), "Need to add to database", Toast.LENGTH_LONG).show();
         } else {
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
-            Toast.makeText(getApplicationContext(), "Item(s) scanned!", Toast.LENGTH_LONG).show();
+
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
 
 
         }
-        //after this we should also refresh the list view...
-        //getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
-
-
-
-
     }
 
     /**
@@ -464,7 +446,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             if(!networkEnabled && !gpsEnabled){
                 //cannot get location view network or gps..
                 //need to handle
-                //start at list view?
+                determineInitialView();
             }
             else {
                 if (networkEnabled) { //first check for location via network
@@ -487,42 +469,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         }
                     }
                 }
-                String out = "Lat: " + lat + " Long: " + lon;
-                System.out.println(out);
-
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        List<Place> places = client.getNearbyPlaces(lat, lon, 25);
-                        int placesCount = places.size();
-                        for (int i = 0; i < placesCount; i++) {
-                            Place currentPlace = places.get(i);
-                            List<String> types = currentPlace.getTypes();
-                            int typeCount = types.size();
-                            System.out.println(typeCount);
-                            String out = "Name: " + currentPlace.getName();
-                            System.out.println(out);
-                            for (int j = 0; j < typeCount; j++) {
-                                String temp = types.get(j);
-                                String out2 = "Type: " + temp;
-                                System.out.println(out2);
-                                if (temp.equalsIgnoreCase("store")) {
-                                    isInStore = true;
-
-                                    return null;
-                                }
-                            }
-                        }
-                        isInStore = false;
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        determineInitialView();
-                        super.onPostExecute(aVoid);
-                    }
-                }.execute();
+                getGooglePlacesResult();
                 locationManager.removeUpdates(this);
 
             }
@@ -537,11 +484,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         System.out.println(isInStore);
         if(isInStore){
             //shopping view
-            IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
-            i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
-            i.setCaptureLayout(R.layout.scanner_layout);
-            i.addExtra("closedFromScan", true);
-            i.initiateScan();
+            launchScanner();
         }
         else{
             //list view
@@ -556,7 +499,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
          */
     @Override
     public void onLocationChanged(Location location) {
-
+        myLocation = location;
+        lat = myLocation.getLatitude();
+        lon = myLocation.getLongitude();
+        getGooglePlacesResult();
+        determineInitialView();
     }
 
     @Override
@@ -585,5 +532,45 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
 
         }
+    }
+
+    public void getGooglePlacesResult(){
+        new AsyncTask<Void, Void, Void>() { //need to do this in the background
+            @Override
+            protected Void doInBackground(Void... params) {
+                List<Place> places = client.getNearbyPlaces(lat, lon, 25); //get all the places within 25 meters of our location
+                int placesCount = places.size();
+                for (int i = 0; i < placesCount; i++) { //for each place
+                    Place currentPlace = places.get(i);
+                    List<String> types = currentPlace.getTypes(); //get the types of the place, there may be multiple
+                    int typeCount = types.size();
+                    for (int j = 0; j < typeCount; j++) { //for each type
+                        String temp = types.get(j); //get the type
+                        if (temp.equalsIgnoreCase("store") || temp.equalsIgnoreCase("store")) { //check to see if Google thinks the Place is a store
+                            isInStore = true;
+                            locationName = name;
+                            return null;
+                        }
+                    }
+                }
+                isInStore = false;
+                locationName = null;
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) { //called after the Async Task completes
+                determineInitialView();
+                super.onPostExecute(aVoid);
+            }
+        }.execute();
+    }
+
+    public void launchScanner(){
+        IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
+        i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+        i.setCaptureLayout(R.layout.scanner_layout);
+        i.addExtra("closedFromScan", true);
+        i.initiateScan();
     }
 }
