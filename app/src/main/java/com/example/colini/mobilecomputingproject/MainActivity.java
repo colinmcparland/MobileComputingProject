@@ -28,6 +28,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -96,6 +98,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         listView = (ListView) findViewById(R.id.drawerList);
         navi_list = getResources().getStringArray(R.array.navi_list);
 
+        Window window = this.getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.parseColor("#ccdc95"));
+
+        
+
+
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.on,R.string.on){
             @Override
             public void onDrawerOpened(View drawerView) {
@@ -115,6 +125,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
 
         upcCodes = new ArrayList<>();
         mydatabase = openOrCreateDatabase("scanAndShop", MODE_PRIVATE ,null);
