@@ -29,7 +29,7 @@ import java.net.URL;
 /**
  * Created by Yang on 16-03-06.
  */
-public class View_Detial extends Fragment {
+public class DetailFragment extends Fragment {
     SQLiteDatabase mydatabase;
     private Button button;
     private ImageView imageView;

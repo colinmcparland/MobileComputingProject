@@ -42,7 +42,6 @@ public class CheckoutFragment extends Fragment {
     TextView product;
     TextView quantity;
     TextView numProducts;
-    ArrayList<String> barcodes;
     Bitmap bitmapForBarcode;
     int currPos = 0;
     JSONObject myObject;
@@ -133,7 +132,7 @@ public class CheckoutFragment extends Fragment {
             @Override
             public boolean onDown(MotionEvent e){
                 return true;
-            }
+            } //registers the users first type
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){ //found on StackOverflow../
@@ -272,7 +271,7 @@ public class CheckoutFragment extends Fragment {
     }
 
 
-    protected class Product{
+    protected class Product{ //small inner class to handle the Database results.
         String barcode;
         String itemTitle;
         int quantity;
@@ -280,13 +279,6 @@ public class CheckoutFragment extends Fragment {
             barcode = code;
             itemTitle = title;
             quantity = quant;
-        }
-
-        @Override
-        public String toString() {
-            String text = "Title: " + itemTitle + " Barcode: " + barcode + " Quant: " + quantity;
-
-            return text;
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.colini.mobilecomputingproject;
 
-import android.content.ClipData;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,12 +10,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -142,7 +137,7 @@ public class ListFragment extends Fragment {
                     public void onClick(View v) {
                         Bundle bundle = new Bundle();
                         bundle.putInt("ID", ii);
-                        View_Detial fragobj = new View_Detial();
+                        DetailFragment fragobj = new DetailFragment();
                         fragobj.setArguments(bundle);
 
                         getFragmentManager().beginTransaction().replace(R.id.mainContainer, fragobj).addToBackStack("listView").commit();

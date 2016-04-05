@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MobileComputingProject</string>
+    <string name="app_name">QuickScan</string>
     <string name="action_settings">Settings</string>
     <string name="scan">Scan</string>
     <string name="shoppingview_name">Shopping View</string>
