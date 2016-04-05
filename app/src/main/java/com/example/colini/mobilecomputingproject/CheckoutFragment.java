@@ -49,7 +49,7 @@ public class CheckoutFragment extends Fragment {
     SQLiteDatabase myDb;
     ArrayList <Product> myCart;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
         myCart = new ArrayList<Product>();
         Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant, product_name from list where scanned = 1 group by barcode",null);
@@ -94,7 +94,10 @@ public class CheckoutFragment extends Fragment {
         finish.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
-
+                        String storeName = savedInstanceState.getString("locationName");
+                        if(storeName == null){
+                            //handle this, maybe ask the user for it?
+                        }
                         myDb.execSQL("insert into payment (store_name, time) values (\""+""+"\",date('now'))");
                         Cursor payment=myDb.rawQuery("select * from payment order by id desc limit 1", null);
                         payment.moveToFirst();

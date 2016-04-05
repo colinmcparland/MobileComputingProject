@@ -139,6 +139,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
         }
         if(navi_list[position].equalsIgnoreCase("Checkout View")){
+            Bundle b = new Bundle();
+            b.putString("locationName", locationName);
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new CheckoutFragment()).addToBackStack("CheckoutFragment").commit();
         }
 
@@ -269,7 +271,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    mydatabase.execSQL("insert into list (product_name, barcode, scanned) values('" + item + "','"+upcCode+"',1)");
+                    mydatabase.execSQL("insert into list (product_name, barcode, scanned) values('" + item + "','" + upcCode + "',1)");
                     getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
 
                 }
