@@ -58,32 +58,26 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     SQLiteDatabase mydatabase;
     public static String currentView="";
 
-    String locationName;
-    boolean isInStore;
-    boolean gpsEnabled;
-    boolean networkEnabled;
+    String locationName; //used to save the locations name in history
+    boolean isInStore; //flag for if a user is in a store
+    boolean gpsEnabled; //flag for if the gps provider is enabled
+    boolean networkEnabled; //flag for if the network provider is enabled
     Location myLocation;
     LocationManager locationManager;
     double lat;
     double lon;
 
-    boolean closedFromScan;
-
-
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
-
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
-
-    GooglePlaces client;
+    boolean closedFromScan; //flag for if the scanner has been closed. The main activity will restart after the scanner, so we don't want to display the scanner again if were in a store
+    GooglePlaces client; //Google Places client
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new SplashFragment()).addToBackStack("HistoryFragment").commit();
-        client = new GooglePlaces("AIzaSyCSUGPn5OAK26WX5x9IbnnNoajQL2tn44w");
-        getLocation();
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new SplashFragment()).addToBackStack("HistoryFragment").commit(); //start on this screen while we get the location
+        client = new GooglePlaces("AIzaSyCSUGPn5OAK26WX5x9IbnnNoajQL2tn44w"); //create new Google Places client with given key
+        getLocation(); // get the users location
 
 
         mydatabase = openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
@@ -257,9 +251,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void processItem(String itemName, final String upcCode){
         final String item = itemName;
-
+        //check to see if this item is on the list and not scanned
         Cursor c = mydatabase.rawQuery("select * from list where product_name='" + item + "' and scanned = 0;", null);
-        if (c.getCount() == 0) {
+        if (c.getCount() == 0) { //if its not on the list
             // ASK THE USER IF HE WANTS TO ADD THIS ITEM TO THE LIST
             //removed the addNotification from here. We only enter this if the item is in the UPC Database.
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -434,14 +428,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     public void getLocation(){
         try{
-            locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
-            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE); //create the LocationManager
+            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER); //check to see if GPS Provider is enabled
+            networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER); //check to see if Network provider is enabled
 
-            int checkPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+            int checkPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION); //check to see if we can have permission
             if(checkPermission != PackageManager.PERMISSION_GRANTED){
                 //ask for user's permission
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1); //ask for it
             }
 
             if(!networkEnabled && !gpsEnabled){
@@ -451,7 +445,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             }
             else {
                 if (networkEnabled) { //first check for location via network
-                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, Looper.myLooper());
+                    locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
                     if (locationManager != null) {
                         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         if (myLocation != null) {
@@ -461,7 +455,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     }
                 }
                 if (gpsEnabled) { //then check with GPS
-                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, Looper.myLooper());
+                    locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
                     if (locationManager != null) {
                         myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         if (myLocation != null) {
@@ -471,7 +465,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     }
                 }
                 getGooglePlacesResult();
-                locationManager.removeUpdates(this);
+                locationManager.removeUpdates(this); //stop GPS Updates to save battery
 
             }
 
@@ -493,7 +487,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         }
     }
-
 
     /*
         These functions are here to comply with LocationListener. We do not actually use them.
@@ -569,10 +562,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     public void launchScanner(){
-        IntentIntegrator i = new IntentIntegrator(this); //between this line and i.initiateScan() we can edit the Scanner
-        i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
-        i.setCaptureLayout(R.layout.scanner_layout);
-        i.addExtra("closedFromScan", true);
-        i.initiateScan();
+        int checkPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA); //check to see if we can have permission
+        if(checkPermission != PackageManager.PERMISSION_GRANTED){
+            //ask for user's permission
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA}, 1); //ask for it
+        }
+        IntentIntegrator i = new IntentIntegrator(this); //from ZXing, launches and Intent with the scanner
+        i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES); //we're only looking for products
+        i.setCaptureLayout(R.layout.scanner_layout); //custom layout to add cancle button
+        i.addExtra("closedFromScan", true); //flag so we don't enter a loop
+        i.initiateScan(); //start scan
     }
 }
