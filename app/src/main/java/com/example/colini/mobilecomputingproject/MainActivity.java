@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -21,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -87,7 +89,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new SplashFragment()).addToBackStack("HistoryFragment").commit();
         client = new GooglePlaces("AIzaSyCSUGPn5OAK26WX5x9IbnnNoajQL2tn44w");
         getLocation();
-
 
         mydatabase = openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE,null);
         initDB();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +33,7 @@ public class HistoryFragment extends Fragment {
 
         LinearLayout LL = (LinearLayout) rootView.findViewById(R.id.mainContainer);
 
-        initDB();
-
-        //mydatabase.execSQL("drop table history");
-
-
-        Cursor transactions = mydatabase.rawQuery("select * from payment",null);
+        Cursor transactions = mydatabase.rawQuery("select * from payment order by id desc",null);
         if (transactions.getCount()==0)
         {
             LL.addView(creatRow("\tYou haven't purchased any item yet!",""));
@@ -59,13 +55,6 @@ public class HistoryFragment extends Fragment {
         }while(transactions.moveToNext());
 
 
-
-
-
-
-
-
-
         return rootView;
     }
     public LinearLayout creatRow(String productName, String price)
@@ -78,7 +67,8 @@ public class HistoryFragment extends Fragment {
         product.setText(productName);
         Price.setText(price);
 
-        product.setPadding(20, 10, 0, 0);
+        product.setPadding(20, 20, 20, 20);
+        product.setTextSize(16);
         Price.setPadding(30, 10, 0, 10);
 
         GradientDrawable border = new GradientDrawable();
@@ -92,7 +82,7 @@ public class HistoryFragment extends Fragment {
 
 
         Row.addView(product);
-        Row.addView(Price);
+        //Row.addView(Price);
 
         return Row;
     }
@@ -166,15 +156,7 @@ public class HistoryFragment extends Fragment {
     }
 
 
-    public void initDB()
-    {
-        mydatabase.execSQL("CREATE TABLE if not exists`history` (" +
-                "`id` int(10) NOT NULL," +
-                "  `transactionId` int(20) NOT NULL," +
-                "  `pName` char(255) NOT NULL," +
-                "  `price` float(4,2) NOT NULL" +
-                ")");
-    }
+
 
 
 }
