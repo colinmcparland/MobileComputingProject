@@ -558,7 +558,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
         IntentIntegrator i = new IntentIntegrator(this); //from ZXing, launches and Intent with the scanner
         i.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES); //we're only looking for products
-        i.setCaptureLayout(R.layout.scanner_layout); //custom layout to add cancle button
+        i.setCaptureLayout(R.layout.scanner_layout); //custom layout to add cancel button
         i.addExtra("closedFromScan", true); //flag so we don't enter a loop
         i.initiateScan(); //start scan
     }

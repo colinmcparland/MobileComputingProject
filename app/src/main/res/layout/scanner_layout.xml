@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Based on a StackOver example and
+https://github.com/andreipro/zxing-android-minimal/blob/master/sample/src/main/res/layout/custom_capture_layout.xml
+Everything needs to be in a specific order or the scanner crashes.
+Most things are set to visibility="gone", but are still required.
+We only want to show a cancel button.
+-->
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
