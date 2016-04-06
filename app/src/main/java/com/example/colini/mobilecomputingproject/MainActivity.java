@@ -282,9 +282,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             // NOTIFY THE USER THAT THE ITEMS WITH THAT BARCODE HAVE BEEN SCANNED
             mydatabase.execSQL("update list set scanned=1 where product_name='" + item + "';");
 
-            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
-
-
+            //getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).commit();
         }
     }
 
