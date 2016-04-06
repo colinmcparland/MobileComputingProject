@@ -48,8 +48,6 @@ public class DetailFragment extends Fragment {
 
         MainActivity myaty = (MainActivity) getActivity();
 
-        Detail_Data x = myaty.getDetail_data();
-
         // grab id of element from the bundle that was sent by the previous fragment
         final int id = getArguments().getInt("ID");
 

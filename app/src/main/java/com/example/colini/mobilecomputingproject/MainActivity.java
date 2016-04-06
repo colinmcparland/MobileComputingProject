@@ -89,13 +89,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,R.string.on,R.string.on){
             @Override
             public void onDrawerOpened(View drawerView) {
-                //Toast.makeText(getApplicationContext(),"Navi is On",Toast.LENGTH_SHORT).show();
                 super.onDrawerOpened(drawerView);
             }
-
             @Override
             public void onDrawerClosed(View drawerView) {
-                //Toast.makeText(getApplicationContext(),"Navi is Off",Toast.LENGTH_SHORT).show();
                 super.onDrawerClosed(drawerView);
             }
         };
@@ -120,19 +117,16 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         * go to string.xml file to check out the string-array entry.
         *
         * */
-//        if (navi_list[position].equalsIgnoreCase("Detail View")){
-//            getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new View_Detial()).addToBackStack("DetailFragment").commit();
-//        }
-        if(navi_list[position].equalsIgnoreCase("Shopping View")){
+        if(navi_list[position].equalsIgnoreCase("Scan")){
             launchScanner();
         }
-        if (navi_list[position].equalsIgnoreCase("History View")){
+        if (navi_list[position].equalsIgnoreCase("History")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer,new HistoryFragment()).addToBackStack("HistoryFragment").commit();
         }
-        if (navi_list[position].equalsIgnoreCase("List View")){
+        if (navi_list[position].equalsIgnoreCase("Create List")){
             getSupportFragmentManager().beginTransaction().replace(R.id.mainContainer, new ListFragment()).addToBackStack("ListFragment").commit();
         }
-        if(navi_list[position].equalsIgnoreCase("Checkout View")){
+        if(navi_list[position].equalsIgnoreCase("Checkout")){
             Bundle b = new Bundle();
             b.putString("locationName", locationName);
             if(locationName == null){
@@ -381,14 +375,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         return json;
     }
 
-
-    private Detail_Data detail_data;
-    public void setDetail(Detail_Data x){
-        detail_data = x;
-    }
-    public Detail_Data getDetail_data(){
-        return detail_data;
-    }
     public SQLiteDatabase getDatabase(){return mydatabase;}
 
     @Override
