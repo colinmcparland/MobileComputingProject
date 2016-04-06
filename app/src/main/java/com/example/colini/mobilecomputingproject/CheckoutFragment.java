@@ -51,12 +51,12 @@ public class CheckoutFragment extends Fragment {
     ArrayList <Product> myCart;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
-        final String storeName = getArguments().getString("locationName");
+        final String storeName = getArguments().getString("locationName"); //get the location name from the activity
         myDb = getActivity().openOrCreateDatabase("scanAndShop", Context.MODE_PRIVATE, null);
-        myCart = new ArrayList<Product>();
+        myCart = new ArrayList<Product>(); //ArrayList to store a Product, an inner class defined below
         Cursor c =  myDb.rawQuery("select distinct(barcode), count(barcode) as quant, product_name from list where scanned = 1 group by barcode",null);
         try {
-            while (c.moveToNext()) {
+            while (c.moveToNext()) {  //get info from database
                 String barcode = c.getString(0);
                 int quant = c.getInt(1);
                 String name = c.getString(2);
@@ -74,7 +74,7 @@ public class CheckoutFragment extends Fragment {
 
 
 
-
+        //create the view
         myView = inflater.inflate(R.layout.checkoutview_layout, container, false);
         barcodeImage = (ImageView) myView.findViewById(R.id.barcode_image);
         upcCode = (TextView) myView.findViewById(R.id.upc_code);
@@ -83,9 +83,6 @@ public class CheckoutFragment extends Fragment {
         numProducts = (TextView) myView.findViewById(R.id.numProducts);
 
         myObject = new JSONObject();
-
-
-
 
         Button finish=(Button) myView.findViewById(R.id.buttonFinish);
         if (c.getCount()==0)
@@ -145,7 +142,7 @@ public class CheckoutFragment extends Fragment {
             } //registers the users first type
 
             @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){ //found on StackOverflow../
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY){ //based on an example on stack overflow. takes initial and final positions of the users finger
                 final int SWIPE_MIN_DISTANCE = 120; //shortest distance to register a swipe
                 final int SWIPE_MAX_OFF_PATH = 250; //maximum change in y value to ensure the swipe is horizontal
                 final int SWIPE_THRESHOLD_VELOCITY = 200; //how fast the swipe has to be
@@ -159,7 +156,7 @@ public class CheckoutFragment extends Fragment {
                         a left swipe.
                         */
                         if(currPos == 0){
-                            currPos = maxProducts - 1;
+                            currPos = maxProducts - 1; //dont want out of bounds!
                         }
                         else{
                             currPos--;
@@ -244,42 +241,6 @@ public class CheckoutFragment extends Fragment {
         }
         return bm; //return Bitmap to use with ImageView
     }
-
-    /*
-     * @param barcode
-     * @return JSON Object
-     * @throws JSONException
-     */
-    public JSONObject queryUPC(String barcode) throws JSONException
-    {
-        JSONObject json;
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-        StrictMode.setThreadPolicy(policy);
-        String K="";
-        try {
-            URL url = new URL("http://api.upcdatabase.org/json/72b665bccfa4c65025f18e2be5bd2e65/"+barcode);
-            InputStream is = url.openStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
-            String line;
-            while ( (line = br.readLine()) != null)
-
-                K+=line;
-
-            br.close();
-            is.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        json = new JSONObject(K);
-
-        return json;
-    }
-
 
     protected class Product{ //small inner class to handle the Database results.
         String barcode;
